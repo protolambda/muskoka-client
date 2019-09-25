@@ -1,7 +1,64 @@
+.main-root {
+    height: 100%
+}
 
-.todo {
-    position: absolute;
-    z-index: 100;
-    margin: 20px;
-    padding: 16px;
+.header-contents {
+    padding-top: 100px;
+    padding-bottom: 20px;
+    display: flex;
+    align-content: center;
+}
+
+.header-title {
+    text-align: center;
+}
+
+.table-body {
+    display: flex;
+    flex-direction: column;
+}
+
+.table-row {
+    display: flex;
+    flex-direction: row;
+    margin: 1px;
+    padding: 4px;
+}
+
+.table-col-key {
+    width: 20%;
+    min-width: 20em;
+}
+.table-col-time {
+    width: 10%;
+    min-width: 20em;
+}
+.table-col-spec-version {
+    width: 10%;
+    min-width: 8em;
+}
+.table-col-blocks {
+    width: 5%;
+    min-width: 5em;
+}
+.table-col-clients {
+    width: 50%;
+    min-width: 30em;
+}
+
+.table-header {
+    display: flex;
+    flex-direction: row;
+    padding: 8px;
+    margin-bottom: 12px;
+}
+
+.table-navigation {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+}
+
+.client-chip {
+    margin: 16px;
 }
