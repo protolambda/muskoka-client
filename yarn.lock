@@ -9701,6 +9701,11 @@ ts-pnp@^1.0.0:
   resolved "https://registry.yarnpkg.com/ts-pnp/-/ts-pnp-1.1.4.tgz#ae27126960ebaefb874c6d7fa4729729ab200d90"
   integrity sha512-1J/vefLC+BWSo+qe8OnJQfWTYRS6ingxjwqmHMqaMxXMj7kFtKLgAaYW3JeX3mktjgUL+etlU8/B4VUAUI9QGw==
 
+ts.data.json@^0.2.1:
+  version "0.2.1"
+  resolved "https://registry.yarnpkg.com/ts.data.json/-/ts.data.json-0.2.1.tgz#48671ae714c3a72eb6c3a14c4a4913afc8f0587c"
+  integrity sha512-ZXfxHIZiXDlPG27DOpfJ9+oXTPPrl78cbbuvVXwOkJvful1iHw07RZJBeDVjh1oF3MlQhPBwSJ0v7ODyERJ1SQ==
+
 tslib@^1.8.1, tslib@^1.9.0:
   version "1.10.0"
   resolved "https://registry.yarnpkg.com/tslib/-/tslib-1.10.0.tgz#c3c19f95973fb0a62973fb09d90d961ee43e5c8a"

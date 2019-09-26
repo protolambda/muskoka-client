@@ -3,7 +3,6 @@ import {
     Button,
     Checkbox,
     createStyles,
-    Divider,
     Fab,
     FormControl,
     FormControlLabel,
@@ -27,13 +26,27 @@ import {
 import {ArrowLeft, ArrowRight, CubeOutline, Git, Magnify, Tag} from "mdi-material-ui";
 import Moment from 'react-moment';
 import {ClientIcon} from "./ClientComponents";
+import {queryListing, TaskData} from "../api";
 
 type TransitionState = {
     dirty: boolean,
     crashesOnly: boolean,
+    // if undefined, all spec versions are listed
     specVersion: undefined | string,
+    // if empty, all clients are listed
     clientNames: Array<string>,
-    clientVersion: undefined | string,
+    // <clientName> --> <clientVersion>
+    clientVersions: Record<string, string>,
+    // if undefined, the data needs to be loaded.
+    data: undefined | Array<TaskData>,
+    // for pagination (without numbering, based on relative order). Undefined = no specific start
+    startAfter: undefined | string,
+    // for pagination (without numbering, based on relative order). Undefined = no specific end
+    endBefore: undefined | string,
+    // true when data is loading.
+    loading: boolean,
+    // when there is an error, undefined when no error.
+    err: undefined | Error
 }
 
 const clientNames = [
@@ -94,22 +107,6 @@ const styles = (theme: Theme) => {
 interface TransitionProps extends WithStyles<typeof styles> {
 }
 
-type ResultData = {
-    success: boolean,
-    created: Date,
-    clientVendor: string,
-    clientVersion: string,
-    postHash: string
-}
-
-type TaskData = {
-    blocks: number,
-    specVersion: string,
-    created: string,
-    key: string, // to retrieve storage data with
-    result: Record<string, ResultData>,
-};
-
 interface Column {
     id: 'key' | 'time' | 'spec-version' | 'blocks' | 'clients';
     label: any;
@@ -134,99 +131,6 @@ const columns: Column[] = [
     },
 ];
 
-const rows: Array<TaskData> = [
-    {
-        blocks: 5,
-        specVersion: 'v0.8.3',
-        created: new Date().toISOString(),
-        key: 'asdfbdfbgfddsfasffdsaasddsangnfb',
-        result: {
-            'asvfnbvmvhgfzgngsfn': {
-                success: true,
-                created: new Date(),
-                clientVendor: 'pyspec',
-                clientVersion: 'v0.1.2',
-                postHash: '0x12a634b12c34479712a634b12c34479712a634b12c34479712a634b12c344797',
-            }
-        }
-    },
-    {
-        blocks: 5,
-        specVersion: 'v0.8.3',
-        created: new Date().toISOString(),
-        key: 'asfsdgdfhfgfghfgh',
-        result: {
-            'asvfnbvmvhgfzgngsfn': {
-                success: true,
-                created: new Date(),
-                clientVendor: 'pyspec',
-                clientVersion: 'v0.1.2',
-                postHash: '0x12a634b12c34479712a634b12c34479712a634b12c34479712a634b12c344797',
-            }
-        }
-    },
-    {
-        blocks: 5,
-        specVersion: 'v0.8.3',
-        created: new Date().toISOString(),
-        key: 'afdsgfdhfgdjfgjtyjtuk',
-        result: {
-            'asvfnbvmvhgfzgngsfn': {
-                success: true,
-                created: new Date(),
-                clientVendor: 'pyspec',
-                clientVersion: 'v0.1.2',
-                postHash: '0x12a634b12c34479712a634b12c34479712a634b12c34479712a634b12c344797',
-            }
-        }
-    },
-    {
-        blocks: 5,
-        specVersion: 'v0.8.3',
-        created: new Date().toISOString(),
-        key: 'sgfhjhmdhghgsdsehyjhh',
-        result: {
-            'asvfnbvmvhgfzgngsfn': {
-                success: true,
-                created: new Date(),
-                clientVendor: 'pyspec',
-                clientVersion: 'v0.1.2',
-                postHash: '0x12a634b12c34479712a634b12c34479712a634b12c34479712a634b12c344797',
-            }
-        }
-    },
-    {
-        blocks: 5,
-        specVersion: 'v0.8.3',
-        created: new Date().toISOString(),
-        key: 'asdfbdfbgfddsffdsaasddsangnafsaffb',
-        result: {
-            'asvfnbvmvhgfzgngsfn': {
-                success: true,
-                created: new Date(),
-                clientVendor: 'pyspec',
-                clientVersion: 'v0.1.2',
-                postHash: '0x12a634b12c34479712a634b12c34479712a634b12c34479712a634b12c344797',
-            }
-        }
-    },
-    {
-        blocks: 5,
-        specVersion: 'v0.8.3',
-        created: new Date().toISOString(),
-        key: 'asdfbdfbgfddsffdsaasddsangnfb',
-        result: {
-            'asvfnbvmvhgfzgngsfn': {
-                success: true,
-                created: new Date(),
-                clientVendor: 'pyspec',
-                clientVersion: 'v0.1.2',
-                postHash: '0x12a634b12c34479712a634b12c34479712a634b12c34479712a634b12c344797',
-            }
-        }
-    },
-];
-
 class TransitionTable extends Component<TransitionProps, TransitionState> {
 
     state: Readonly<TransitionState> = {
@@ -234,7 +138,29 @@ class TransitionTable extends Component<TransitionProps, TransitionState> {
         crashesOnly: false,
         specVersion: undefined,
         clientNames: [],
-        clientVersion: undefined,
+        clientVersions: {},
+        data: undefined,
+        startAfter: undefined,
+        endBefore: undefined,
+        loading: true,
+        err: undefined
+    };
+
+    loadData = () => {
+        this.setState({err: undefined, loading: true}, () => {
+            queryListing({
+                clients: this.state.clientNames.map(name => ({name: name, version: this.state.clientVersions[name]})),
+                specVersion: this.state.specVersion,
+                crashesOnly: this.state.crashesOnly,
+                startAfter: this.state.startAfter,
+                endBefore: this.state.endBefore,
+            }).then(listing => {
+                this.setState({data: listing, loading: false})
+            }).catch(err => {
+                console.log(err);
+                this.setState({err: err, loading: false})
+            })
+        });
     };
 
     handleChangeClientNames = (event: React.ChangeEvent<{ value: unknown }>) => {
@@ -251,7 +177,12 @@ class TransitionTable extends Component<TransitionProps, TransitionState> {
         return (
             <>
                 <div className={classes.tableFilters}>
-
+                    {this.state.err && (
+                        <div>
+                            {/*TODO style error */}
+                            Error! {this.state.err.toString()}
+                        </div>
+                    )}
                     <Grid container spacing={4} alignItems="flex-end">
                         <Grid item>
                             <Grid container spacing={1} alignItems="flex-end">
@@ -326,6 +257,12 @@ class TransitionTable extends Component<TransitionProps, TransitionState> {
                         ))}
                     </Grid>
                 </div>
+                {this.state.loading && (
+                    <div>
+                        {/*TODO style loading indicator */}
+                        Loading...
+                    </div>
+                )}
                 <Table stickyHeader>
                     <TableHead className={classes.tableHead}>
                         <TableRow>
@@ -342,12 +279,12 @@ class TransitionTable extends Component<TransitionProps, TransitionState> {
                         </TableRow>
                     </TableHead>
                     <TableBody className={classes.tableBody}>
-                        {rows.map(row => {
+                        {this.state.data && this.state.data.map(task => {
                             return (
-                                <TableRow hover role="checkbox" tabIndex={-1} key={row.key}>
+                                <TableRow hover role="checkbox" tabIndex={-1} key={task.key}>
                                     {columns.map(column => (
                                         <TableCell key={column.id} className={classes.tableCell} align="left">
-                                            {column.format(row)}
+                                            {column.format(task)}
                                         </TableCell>
                                     ))}
                                 </TableRow>
