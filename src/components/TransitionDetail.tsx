@@ -24,9 +24,6 @@ const styles = (theme: Theme) => {
         },
         root: {
         },
-        clientsOverview: {
-            backgroundColor: light ? '#de2a42' : '#751923',
-        },
     });
 };
 

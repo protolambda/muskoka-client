@@ -1,5 +1,6 @@
 import React from 'react';
-import {Container, createStyles, Theme, Typography, WithStyles, withStyles} from "@material-ui/core";
+import {Container, createStyles, Fab, Grid, Theme, Typography, WithStyles, withStyles} from "@material-ui/core";
+import {Upload} from "mdi-material-ui";
 
 const styles = (theme: Theme) => {
     const light = theme.palette.type === 'light';
@@ -12,6 +13,13 @@ const styles = (theme: Theme) => {
             paddingTop: theme.spacing(4),
             paddingBottom: theme.spacing(5),
         },
+        fab: {
+            margin: theme.spacing(1),
+            backgroundColor: light ? '#de2a42' : '#751923',
+        },
+        extendedIcon: {
+            marginRight: theme.spacing(1),
+        },
     });
 };
 
@@ -21,8 +29,18 @@ interface Props extends WithStyles<typeof styles> {
 const LandingHeader: React.FC<Props> = ({classes}) => (
     <div className={classes.root}>
         <Container maxWidth="md">
+            <Grid container spacing={4} alignItems="flex-end">
+                <Grid item>
+                    <Fab variant="extended" color="primary" aria-label="delete" className={classes.fab}>
+                        <Upload className={classes.extendedIcon} />
+                        Upload new transition
+                    </Fab>
+                </Grid>
+                <Grid item>
             <Typography component="h1" variant="h1"
                         className={classes.headerTitle + " header-title"}>Muskoka 🛶</Typography>
+                </Grid>
+            </Grid>
         </Container>
     </div>
 );

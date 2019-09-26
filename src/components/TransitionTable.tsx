@@ -1,23 +1,74 @@
 import React, {Component} from 'react';
 import {
-    createStyles, Fab,
-    Table, TableBody, TableCell, TableHead, TableRow,
+    Button,
+    Checkbox,
+    createStyles,
+    Divider,
+    Fab,
+    FormControl,
+    FormControlLabel,
+    Grid,
+    Input,
+    InputLabel,
+    ListItemText,
+    MenuItem,
+    Select,
+    Switch,
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableRow,
+    TextField,
     Theme,
     withStyles,
     WithStyles
 } from "@material-ui/core";
-import {ArrowLeft, ArrowRight, CubeOutline} from "mdi-material-ui";
+import {ArrowLeft, ArrowRight, CubeOutline, Git, Magnify, Tag} from "mdi-material-ui";
 import Moment from 'react-moment';
 import {ClientIcon} from "./ClientComponents";
 
-type MainState = {}
+type TransitionState = {
+    dirty: boolean,
+    crashesOnly: boolean,
+    specVersion: undefined | string,
+    clientNames: Array<string>,
+    clientVersion: undefined | string,
+}
+
+const clientNames = [
+    'artemis', 'harmony', 'lighthouse', 'lodestar', 'nimbus', 'prysm', 'pyspec', 'shasper', 'trinity', 'yeeth', 'zrnt'
+];
+
+const ITEM_HEIGHT = 48;
+const ITEM_PADDING_TOP = 8;
+const ClientMenuProps = {
+    PaperProps: {
+        style: {
+            maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+            width: 250,
+        },
+    },
+};
 
 const styles = (theme: Theme) => {
     const light = theme.palette.type === 'light';
     return createStyles({
-        tableCell: {
-            borderBottomColor: light ? '#ffcd4c' : '#403a29',
-            color: light ? '#333333' : '#cccccc',
+        tableFilters: {
+            backgroundColor: light ? '#ffcd4c' : '#403a29',
+            paddingTop: theme.spacing(1),
+            paddingBottom: theme.spacing(1),
+            paddingLeft: theme.spacing(2),
+            paddingRight: theme.spacing(2),
+            borderTopLeftRadius: theme.spacing(1),
+            borderTopRightRadius: theme.spacing(1),
+        },
+        clientNamesSelect: {
+            minWidth: '10em',
+        },
+        versionInput: {
+            minWidth: '7em',
+            maxWidth: '10em'
         },
         tableHead: {
             backgroundColor: light ? '#ffcd4c' : '#403a29',
@@ -28,6 +79,10 @@ const styles = (theme: Theme) => {
         tableBody: {
             backgroundColor: light ? '#feffd9' : '#1e1913',
         },
+        tableCell: {
+            borderBottomColor: light ? '#ffcd4c' : '#403a29',
+            color: light ? '#333333' : '#cccccc',
+        },
         tableNav: {
             display: "flex",
             justifyContent: "space-between",
@@ -36,7 +91,7 @@ const styles = (theme: Theme) => {
     });
 };
 
-interface MainProps extends WithStyles<typeof styles> {
+interface TransitionProps extends WithStyles<typeof styles> {
 }
 
 type ResultData = {
@@ -84,7 +139,7 @@ const rows: Array<TaskData> = [
         blocks: 5,
         specVersion: 'v0.8.3',
         created: new Date().toISOString(),
-        key: 'asdfbdfbgfddsffdsaasddsangnfb',
+        key: 'asdfbdfbgfddsfasffdsaasddsangnfb',
         result: {
             'asvfnbvmvhgfzgngsfn': {
                 success: true,
@@ -129,7 +184,7 @@ const rows: Array<TaskData> = [
         blocks: 5,
         specVersion: 'v0.8.3',
         created: new Date().toISOString(),
-        key: 'sgfhjhmdhghgehyjhh',
+        key: 'sgfhjhmdhghgsdsehyjhh',
         result: {
             'asvfnbvmvhgfzgngsfn': {
                 success: true,
@@ -144,7 +199,7 @@ const rows: Array<TaskData> = [
         blocks: 5,
         specVersion: 'v0.8.3',
         created: new Date().toISOString(),
-        key: 'asdfbdfbgfddsffdsaasddsangnfb',
+        key: 'asdfbdfbgfddsffdsaasddsangnafsaffb',
         result: {
             'asvfnbvmvhgfzgngsfn': {
                 success: true,
@@ -172,14 +227,105 @@ const rows: Array<TaskData> = [
     },
 ];
 
-class TransitionTable extends Component<MainProps, MainState> {
+class TransitionTable extends Component<TransitionProps, TransitionState> {
 
-    state: Readonly<MainState> = {};
+    state: Readonly<TransitionState> = {
+        dirty: false,
+        crashesOnly: false,
+        specVersion: undefined,
+        clientNames: [],
+        clientVersion: undefined,
+    };
+
+    handleChangeClientNames = (event: React.ChangeEvent<{ value: unknown }>) => {
+        this.setState({clientNames: event.target.value as string[], dirty: true});
+    };
+
+    handleChangeCrashesOnly = (event: React.ChangeEvent<HTMLInputElement>) => {
+        this.setState({crashesOnly: event.target.checked, dirty: true});
+    };
 
     render() {
         const {classes} = this.props;
+        // @ts-ignore
         return (
             <>
+                <div className={classes.tableFilters}>
+
+                    <Grid container spacing={4} alignItems="flex-end">
+                        <Grid item>
+                            <Grid container spacing={1} alignItems="flex-end">
+                                <Grid item>
+                                    <Magnify />
+                                </Grid>
+                                <Grid item>
+                                    <TextField id="input-with-icon-grid" label="Find transition by key" />
+                                </Grid>
+                            </Grid>
+                        </Grid>
+
+                        <Grid item>
+                            <Grid container spacing={1} alignItems="flex-end">
+                                <Grid item>
+                                    <Tag />
+                                </Grid>
+                                <Grid item>
+                                    <TextField id="input-with-icon-grid" label="spec version" className={classes.versionInput} />
+                                </Grid>
+                            </Grid>
+                        </Grid>
+
+                        <Grid item>
+                            <FormControlLabel
+                                control={
+                                    <Switch checked={this.state.crashesOnly} color="primary" onChange={this.handleChangeCrashesOnly} value="crashesOnly" />
+                                }
+                                label="With crashes only"
+                            />
+                        </Grid>
+                        <Grid item>
+                            <Button variant="contained" color="primary" disabled={!this.state.dirty}>
+                                Search
+                            </Button>
+                        </Grid>
+                    </Grid>
+
+                    <Grid container spacing={4} alignItems="flex-end">
+                        <Grid item>
+                            <FormControl>
+                                <InputLabel htmlFor="select-multiple-checkbox">Clients</InputLabel>
+                                <Select
+                                    multiple
+                                    className={classes.clientNamesSelect}
+                                    value={this.state.clientNames}
+                                    onChange={this.handleChangeClientNames}
+                                    input={<Input id="select-multiple-checkbox" />}
+                                    renderValue={selected => (selected as string[]).join(', ')}
+                                    MenuProps={ClientMenuProps}
+                                >
+                                    {clientNames.map(name => (
+                                        <MenuItem key={name} value={name}>
+                                            <Checkbox checked={this.state.clientNames.indexOf(name) > -1} />
+                                            <ListItemText primary={name} />
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
+                        </Grid>
+                        {this.state.clientNames.map(name => (
+                            <Grid item key={"client-version-"+name}>
+                                <Grid container spacing={1} alignItems="flex-end">
+                                    <Grid item>
+                                        <Git />
+                                    </Grid>
+                                    <Grid item>
+                                        <TextField id="input-with-icon-grid" label={name+" version"} className={classes.versionInput}/>
+                                    </Grid>
+                                </Grid>
+                            </Grid>
+                        ))}
+                    </Grid>
+                </div>
                 <Table stickyHeader>
                     <TableHead className={classes.tableHead}>
                         <TableRow>
