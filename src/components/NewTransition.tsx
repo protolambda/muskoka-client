@@ -3,7 +3,7 @@ import {
     Button,
     createStyles,
     Divider,
-    Grid,
+    Grid, IconButton,
     List,
     ListItem,
     ListItemAvatar,
@@ -17,8 +17,9 @@ import {
     WithStyles
 } from "@material-ui/core";
 import {SortableHandle, SortableContainer, SortableElement} from 'react-sortable-hoc';
-import {CubeOutline, ReorderHorizontal} from "mdi-material-ui";
+import {Alphabetical, ClockOutline, CubeOutline, Numeric, ReorderHorizontal} from "mdi-material-ui";
 import arrayMove from 'array-move';
+import Moment from "react-moment";
 
 type State = {
     preStateFile: undefined | File,
@@ -48,6 +49,9 @@ const styles = (theme: Theme) => {
         submitInput: {
             display: "none",
         },
+        sortBtn: {
+            margin: theme.spacing(1),
+        },
         preStateBtn: {
             margin: theme.spacing(1),
         },
@@ -66,6 +70,18 @@ interface Props extends WithStyles<typeof styles> {
 const BlockDragHandle = SortableHandle(() => <ReorderHorizontal/>
 );
 
+const sizeIntToString = (v: number) => {
+    if(v < 1024) {
+        return `${v} bytes`
+    }
+    v = Math.ceil(v / 1024);
+    if(v < 1024) {
+        return `${v} KB`
+    }
+    v = Math.ceil(v / 1024);
+    return `${v} MB`
+};
+
 const SortableBlockItem = SortableElement((args: { value: File | undefined }) =>
     <ListItem>
         <ListItemAvatar>
@@ -78,7 +94,7 @@ const SortableBlockItem = SortableElement((args: { value: File | undefined }) =>
             />
             : <ListItemText
                 primary={args.value.name}
-                secondary={args.value.lastModified.toString()}
+                secondary={<span>Last modified on <Moment format="D MMM hh:mm:ss" unix>{args.value.lastModified.toString()}</Moment> ({sizeIntToString(args.value.size)})</span>}
             />
         }
         <ListItemSecondaryAction>
@@ -132,6 +148,36 @@ class NewTransition extends Component<Props, State> {
             blockFileIndices: arrayMove(blockFileIndices, args.oldIndex, args.newIndex),
         }));
     };
+
+    sortBlocks = (comparator: (a: File, b: File) => number) => () => {
+        this.setState((prevState: {blockFileIndices: Array<number>, blockFileList: undefined | FileList}) => {
+            if (prevState.blockFileList === undefined) {
+                return null;
+            }
+            const sortedIndices = Array.from(prevState.blockFileIndices);
+            const files = prevState.blockFileList;
+            sortedIndices.sort((a: number, b: number) => comparator(files[a], files[b]));
+            return ({
+                blockFileIndices: sortedIndices,
+            })
+        });
+    };
+
+    sortBlocksNumeric = this.sortBlocks((a: File, b: File): number => {
+        const aNumMatch = a.name.match(/\d+/g);
+        if (aNumMatch == null) {
+            return -1;
+        }
+        const bNumMatch = b.name.match(/\d+/g);
+        if (bNumMatch == null) {
+            return -1;
+        }
+        const aNum = parseInt(aNumMatch[0], 10);
+        const bNum = parseInt(bNumMatch[0], 10);
+        return aNum - bNum;
+    });
+    sortBlocksAlphabetic = this.sortBlocks((a: File, b: File): number => a.name.localeCompare(b.name));
+    sortBlocksCreationTime = this.sortBlocks((a: File, b: File): number => a.lastModified - b.lastModified);
 
     render() {
         const {classes} = this.props;
@@ -190,6 +236,18 @@ class NewTransition extends Component<Props, State> {
                             <Divider/>
                             <Typography variant="caption">Selected {this.state.blockFileIndices.length} blocks</Typography>
                             <Divider/>
+                            {this.state.blockFileIndices.length > 0 && <div>
+                                Sort blocks:
+                                <IconButton className={classes.sortBtn} aria-label="sort-numeric" onClick={this.sortBlocksNumeric}>
+                                    <Numeric />
+                                </IconButton>
+                                <IconButton className={classes.sortBtn} aria-label="sort-alphabetic" onClick={this.sortBlocksAlphabetic}>
+                                    <Alphabetical />
+                                </IconButton>
+                                <IconButton className={classes.sortBtn} aria-label="sort-creation-time" onClick={this.sortBlocksCreationTime}>
+                                    <ClockOutline />
+                                </IconButton>
+                            </div>}
                             <SortableBlocksList key={this.state.blockFileIndices.join("_")}
                                                 items={this.state.blockFileIndices.map((i) => (this.state.blockFileList === undefined ? undefined : this.state.blockFileList[i]))}
                                                 onSortEnd={this.onBlocksSortEnd} useDragHandle/>
