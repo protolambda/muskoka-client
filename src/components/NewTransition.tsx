@@ -19,7 +19,7 @@ const styles = (theme: Theme) => {
 interface Props extends WithStyles<typeof styles> {
 }
 
-class TransitionDetail extends Component<Props, State> {
+class NewTransition extends Component<Props, State> {
 
     state: Readonly<State> = {};
 
@@ -33,4 +33,4 @@ class TransitionDetail extends Component<Props, State> {
     }
 }
 
-export default withStyles(styles)(TransitionDetail);
+export default withStyles(styles)(NewTransition);

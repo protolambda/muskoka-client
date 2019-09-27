@@ -6,6 +6,8 @@ import {Container} from "@material-ui/core";
 import LandingHeader from "./components/LandingHeader";
 import SimpleHeader from "./components/SimpleHeader";
 import TransitionTable from "./components/TransitionTable";
+import Page404 from "./components/404";
+import NewTransition from "./components/NewTransition";
 
 const styles = (theme: Theme) => createStyles({
     root: {
@@ -30,6 +32,9 @@ const Pages: React.FC<Props> = ({classes}) => {
                     <Switch>
                         <Route exact path='/' component={TransitionTable}/>
                         <Route exact strict={false} path='/about' component={About}/>
+                        <Route exact strict={false} path='/new' component={NewTransition}/>
+                        <Route path='404' component={Page404}/>
+                        <Route path='*' component={Page404}/>
                     </Switch>
                 </Container>
             </Router>
