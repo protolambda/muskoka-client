@@ -15,6 +15,7 @@ const styles = (theme: Theme) => {
         },
         root: {
             padding: theme.spacing(1),
+            marginBottom: theme.spacing(2),
         },
     });
 };
