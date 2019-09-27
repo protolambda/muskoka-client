@@ -66,22 +66,22 @@ export const queryListing = async (args: {clients?: Array<ClientQuery>, specVers
         params.set('before', endBefore);
     }
     const resp = await fetch(apiURL.toString());
-    if(resp.status != 200) {
+    if(resp.status !== 200) {
         // throw with body (describes error)
-        throw "failed to get data from listing api: "+resp.body;
+        throw new Error("failed to get data from listing api: "+resp.body);
     }
 
     return listingDec.decodePromise(resp.body);
 };
 
 export const queryTask = async (taskKey: string): Promise<TaskData> => {
-    const apiURL = new URL(apiEndpoint + '/listing');
+    const apiURL = new URL(apiEndpoint + '/task');
     const params = apiURL.searchParams;
     params.set('key', taskKey);
     const resp = await fetch(apiURL.toString());
-    if(resp.status != 200) {
+    if(resp.status !== 200) {
         // throw with body (describes error)
-        throw "failed to get data from listing api: "+resp.body;
+        throw new Error("failed to get data from task api: "+resp.body);
     }
 
     return taskDec.decodePromise(resp.body);

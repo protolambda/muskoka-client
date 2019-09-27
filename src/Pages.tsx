@@ -9,8 +9,9 @@ import TransitionTable from "./components/TransitionTable";
 
 const styles = (theme: Theme) => createStyles({
     root: {
-        backgroundColor: (theme.palette.type === 'light') ? '#54aeef' : '#122634',
-        height: "100%",
+        backgroundColor: (theme.palette.type === 'light') ? '#54aeef' : '#000000',
+        minHeight: "100%",
+        paddingBottom: theme.spacing(4),
         width: "100%"
     }
 });

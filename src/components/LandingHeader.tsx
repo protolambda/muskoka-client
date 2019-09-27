@@ -1,6 +1,7 @@
 import React from 'react';
 import {Container, createStyles, Fab, Grid, Theme, Typography, WithStyles, withStyles} from "@material-ui/core";
 import {Upload} from "mdi-material-ui";
+import Canoe from "./Canoe";
 
 const styles = (theme: Theme) => {
     const light = theme.palette.type === 'light';
@@ -38,7 +39,7 @@ const LandingHeader: React.FC<Props> = ({classes}) => (
                 </Grid>
                 <Grid item>
             <Typography component="h1" variant="h1"
-                        className={classes.headerTitle + " header-title"}>Muskoka 🛶</Typography>
+                        className={classes.headerTitle + " header-title"}>Muskoka <Canoe/></Typography>
                 </Grid>
             </Grid>
         </Container>
