@@ -205,6 +205,16 @@ class TransitionTable extends Component<TransitionProps, TransitionState> {
         this.setState({taskKey: event.target.value as string});
     };
 
+    handleChangeSpecVersion = (event: React.ChangeEvent<HTMLInputElement>) => {
+        this.setState({specVersion: event.target.value as string, dirty: true});
+    };
+
+    handleChangeClientVersion = (clientName: string) => (event: React.ChangeEvent<HTMLInputElement>) => {
+        const value = event.target.value as string;
+        this.setState(prevState => ({
+            clientVersions: {...prevState.clientVersions, [clientName]: value}, dirty: true}));
+    };
+
     handleChangeClientNames = (event: React.ChangeEvent<{ value: unknown }>) => {
         this.setState({clientNames: event.target.value as string[], dirty: true});
     };
@@ -245,8 +255,8 @@ class TransitionTable extends Component<TransitionProps, TransitionState> {
                                     <Tag/>
                                 </Grid>
                                 <Grid item>
-                                    <TextField id="input-with-icon-grid" label="spec version"
-                                               className={classes.versionInput}/>
+                                    <TextField label="spec version"
+                                               onChange={this.handleChangeSpecVersion} className={classes.versionInput}/>
                                 </Grid>
                             </Grid>
                         </Grid>
@@ -288,7 +298,9 @@ class TransitionTable extends Component<TransitionProps, TransitionState> {
                                         <Git/>
                                     </Grid>
                                     <Grid item>
-                                        <TextField id="input-with-icon-grid" label={name + " version"}
+                                        <TextField label={name + " version"}
+                                                   value={this.state.clientVersions[name] || ""}
+                                                   onChange={this.handleChangeClientVersion(name)}
                                                    className={classes.versionInput}/>
                                     </Grid>
                                 </Grid>
