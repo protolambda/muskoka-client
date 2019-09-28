@@ -28,11 +28,14 @@ import {
 import arrayMove from 'array-move';
 import Moment from "react-moment";
 
+const uploadEndpoint = "http://localhost:8080/upload";
+
 type State = {
     preStateFile: undefined | File,
     blockFileList: undefined | FileList,
     blockFileIndices: Array<number>,
     specVersion: string,
+    specConfig: string,
 }
 
 const styles = (theme: Theme) => {
@@ -53,6 +56,10 @@ const styles = (theme: Theme) => {
         specVersionInput: {
             minWidth: '7em',
             maxWidth: '10em'
+        },
+        specConfigInput: {
+            minWidth: '9em',
+            maxWidth: '12em'
         },
         preStateInput: {
             display: "none",
@@ -132,10 +139,15 @@ class NewTransition extends Component<Props, State> {
         blockFileList: undefined,
         blockFileIndices: [],
         specVersion: "v0.8.3",
+        specConfig: "minimal",
     };
 
     onChangeSpecVersion = (e: React.ChangeEvent<HTMLInputElement>) => {
         this.setState({specVersion: e.target.value as string || ""});
+    };
+
+    onChangeSpecConfig = (e: React.ChangeEvent<HTMLInputElement>) => {
+        this.setState({specConfig: e.target.value as string || ""});
     };
 
     onChangePreState = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -211,12 +223,24 @@ class NewTransition extends Component<Props, State> {
                 <br/>
                 <form
                     encType="multipart/form-data"
-                    action="http://localhost:8080/upload"
+                    action={uploadEndpoint}
                     method="post"
                     noValidate
                     autoComplete="off"
                 >
                     <Grid container spacing={4} alignItems="flex-start" justify="space-evenly">
+                        <Grid item>
+                            <TextField
+                                id="spec-config"
+                                label="Spec config"
+                                type="text"
+                                className={classes.specConfigInput}
+                                name="spec-config"
+                                value={this.state.specConfig}
+                                onChange={this.onChangeSpecConfig}
+                                margin="normal"
+                            />
+                        </Grid>
                         <Grid item>
                             <TextField
                                 id="spec-version"
@@ -287,7 +311,7 @@ class NewTransition extends Component<Props, State> {
                         <Grid item>
                             <label htmlFor="submit-transition">
                                 <Button component="span" className={classes.submitBtn} variant="contained" color="primary" disabled={
-                                    !(this.state.specVersion !== "" && this.state.preStateFile !== undefined
+                                    !(this.state.specConfig !== "" && this.state.specVersion !== "" && this.state.preStateFile !== undefined
                                         && this.state.blockFileList !== undefined && this.state.blockFileList.length > 0)}>
                                     Submit
                                 </Button>

@@ -11,6 +11,7 @@ export type ResultData = {
 export type TaskData = {
     blocks: number,
     specVersion: string,
+    specConfig: string,
     created: string,
     key: string, // to retrieve storage data with
     result: Record<string, ResultData>,
@@ -29,6 +30,7 @@ const resultsDec = JsonDecoder.dictionary<ResultData>(resultDec, 'results');
 const taskDec = JsonDecoder.object<TaskData>({
     blocks: JsonDecoder.number,
     specVersion: JsonDecoder.string,
+    specConfig: JsonDecoder.string,
     created: JsonDecoder.string,
     key: JsonDecoder.string,
     result: resultsDec,
@@ -44,10 +46,12 @@ export type ClientQuery = {
     version: undefined | string,
 };
 
-export const queryListing = async (args: {clients?: Array<ClientQuery>, specVersion?: string, crashesOnly?: boolean, startAfter?: string, endBefore?: string}): Promise<Array<TaskData>> => {
+export const queryListing = async (args: {
+    clients?: Array<ClientQuery>, specVersion?: string, specConfig?: string,
+    crashesOnly?: boolean, startAfter?: string, endBefore?: string}): Promise<Array<TaskData>> => {
     const apiURL = new URL(apiEndpoint + '/listing');
     const params = apiURL.searchParams;
-    const {clients, specVersion, crashesOnly, startAfter, endBefore} = args;
+    const {clients, specVersion, specConfig, crashesOnly, startAfter, endBefore} = args;
     if(clients !== undefined) {
         for (const q of clients) {
             params.set('client_'+q.name, q.version || 'all')
@@ -55,6 +59,9 @@ export const queryListing = async (args: {clients?: Array<ClientQuery>, specVers
     }
     if(specVersion !== undefined) {
         params.set('spec-version', specVersion);
+    }
+    if(specConfig !== undefined) {
+        params.set('spec-config', specConfig);
     }
     if(crashesOnly !== undefined) {
         params.set('crashes-only', 'true');

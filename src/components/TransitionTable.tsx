@@ -23,7 +23,16 @@ import {
     withStyles,
     WithStyles
 } from "@material-ui/core";
-import {ArrowLeft, ArrowRight, CubeOutline, FileDocumentBox, Git, Magnify, Tag} from "mdi-material-ui";
+import {
+    ArrowLeft,
+    ArrowRight,
+    CubeOutline,
+    FileDocumentBox,
+    FileSettingsVariantOutline,
+    Git,
+    Magnify,
+    Tag
+} from "mdi-material-ui";
 import Moment from 'react-moment';
 import {ClientIcon} from "./ClientComponents";
 import {queryListing, TaskData} from "../api";
@@ -36,6 +45,8 @@ type TransitionState = {
     taskKey: string,
     // if undefined, all spec versions are listed
     specVersion: undefined | string,
+    // if undefined, all spec configs are listed
+    specConfig: undefined | string,
     // if empty, all clients are listed
     clientNames: Array<string>,
     // <clientName> --> <clientVersion>
@@ -87,6 +98,10 @@ const styles = (theme: Theme) => {
             minWidth: '7em',
             maxWidth: '10em'
         },
+        configInput: {
+            minWidth: '9em',
+            maxWidth: '12em'
+        },
         tableHead: {
             backgroundColor: light ? '#ffcd4c' : '#1d1d1d',
         },
@@ -128,7 +143,7 @@ interface TransitionProps extends WithStyles<typeof styles> {
 }
 
 interface Column {
-    id: 'key' | 'time' | 'spec-version' | 'blocks' | 'clients';
+    id: 'key' | 'time' | 'spec-version' | 'spec-config' | 'blocks' | 'clients';
     label: any;
     minWidth?: number;
     format: (value: TaskData) => any;
@@ -149,6 +164,12 @@ const columns: Column[] = [
         cellPlaceholder: () => (<Skeleton height={6} width="50%"/>)
     },
     {
+        id: 'spec-config',
+        label: 'Spec Config',
+        format: (value: TaskData) => value.specConfig,
+        cellPlaceholder: () => (<Skeleton height={6} width="50%"/>)
+    },
+    {
         id: 'blocks',
         label: <CubeOutline style={{position: 'relative', top: '0.15em'}}/>,
         format: (value: TaskData) => value.blocks,
@@ -162,6 +183,7 @@ const columns: Column[] = [
     {
         id: 'clients',
         label: 'Results',
+        minWidth: 400,
         format: (value: TaskData) => (<div>{Object.entries(value.result).map(
             ([k, v]) => (<ClientIcon key={k} clientVendor={v.clientVendor}/>))}</div>),
         cellPlaceholder: () => (<Skeleton height={6} width="80%"/>)
@@ -175,6 +197,7 @@ class TransitionTable extends Component<TransitionProps, TransitionState> {
         crashesOnly: false,
         taskKey: "",
         specVersion: undefined,
+        specConfig: undefined,
         clientNames: [],
         clientVersions: {},
         data: undefined,
@@ -189,6 +212,7 @@ class TransitionTable extends Component<TransitionProps, TransitionState> {
             queryListing({
                 clients: this.state.clientNames.map(name => ({name: name, version: this.state.clientVersions[name]})),
                 specVersion: this.state.specVersion,
+                specConfig: this.state.specConfig,
                 crashesOnly: this.state.crashesOnly,
                 startAfter: this.state.startAfter,
                 endBefore: this.state.endBefore,
@@ -206,6 +230,10 @@ class TransitionTable extends Component<TransitionProps, TransitionState> {
     };
 
     handleChangeSpecVersion = (event: React.ChangeEvent<HTMLInputElement>) => {
+        this.setState({specVersion: event.target.value as string, dirty: true});
+    };
+
+    handleChangeSpecConfig = (event: React.ChangeEvent<HTMLInputElement>) => {
         this.setState({specVersion: event.target.value as string, dirty: true});
     };
 
@@ -257,6 +285,18 @@ class TransitionTable extends Component<TransitionProps, TransitionState> {
                                 <Grid item>
                                     <TextField label="spec version"
                                                onChange={this.handleChangeSpecVersion} className={classes.versionInput}/>
+                                </Grid>
+                            </Grid>
+                        </Grid>
+
+                        <Grid item>
+                            <Grid container spacing={1} alignItems="flex-end">
+                                <Grid item>
+                                    <FileSettingsVariantOutline/>
+                                </Grid>
+                                <Grid item>
+                                    <TextField label="spec config"
+                                               onChange={this.handleChangeSpecConfig} className={classes.configInput}/>
                                 </Grid>
                             </Grid>
                         </Grid>
