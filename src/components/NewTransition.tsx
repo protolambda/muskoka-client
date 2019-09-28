@@ -27,8 +27,7 @@ import {
 } from "mdi-material-ui";
 import arrayMove from 'array-move';
 import Moment from "react-moment";
-
-const uploadEndpoint = "http://localhost:8080/upload";
+import {uploadEndpoint} from "../api";
 
 type State = {
     preStateFile: undefined | File,

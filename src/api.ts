@@ -23,7 +23,11 @@ const resultDec = JsonDecoder.object<ResultData>({
     clientVendor: JsonDecoder.string,
     clientVersion: JsonDecoder.string,
     postHash: JsonDecoder.string,
-}, 'result');
+}, 'result', {
+    clientVendor: 'client-vendor',
+    clientVersion: 'client-version',
+    postHash: 'post-hash'
+});
 
 const resultsDec = JsonDecoder.dictionary<ResultData>(resultDec, 'results');
 
@@ -33,8 +37,11 @@ const taskDec = JsonDecoder.object<TaskData>({
     specConfig: JsonDecoder.string,
     created: JsonDecoder.string,
     key: JsonDecoder.string,
-    result: resultsDec,
-}, 'task');
+    result: JsonDecoder.oneOf<Record<string, ResultData>>([JsonDecoder.isUndefined({}), resultsDec], 'optional result-dict'),
+}, 'task', {
+    specVersion: 'spec-version',
+    specConfig: 'spec-config'
+});
 
 const listingDec = JsonDecoder.array<TaskData>(taskDec, 'listing');
 
@@ -48,10 +55,10 @@ export type ClientQuery = {
 
 export const queryListing = async (args: {
     clients?: Array<ClientQuery>, specVersion?: string, specConfig?: string,
-    crashesOnly?: boolean, startAfter?: string, endBefore?: string}): Promise<Array<TaskData>> => {
+    hasFail?: boolean, startAfter?: string, endBefore?: string}): Promise<Array<TaskData>> => {
     const apiURL = new URL(apiEndpoint + '/listing');
     const params = apiURL.searchParams;
-    const {clients, specVersion, specConfig, crashesOnly, startAfter, endBefore} = args;
+    const {clients, specVersion, specConfig, hasFail, startAfter, endBefore} = args;
     if(clients !== undefined) {
         for (const q of clients) {
             params.set('client_'+q.name, q.version || 'all')
@@ -63,8 +70,8 @@ export const queryListing = async (args: {
     if(specConfig !== undefined) {
         params.set('spec-config', specConfig);
     }
-    if(crashesOnly !== undefined) {
-        params.set('crashes-only', 'true');
+    if(hasFail) {
+        params.set('has-fail', 'true');
     }
     if(startAfter !== undefined) {
         params.set('after', startAfter);
@@ -72,13 +79,22 @@ export const queryListing = async (args: {
     if(endBefore !== undefined) {
         params.set('before', endBefore);
     }
-    const resp = await fetch(apiURL.toString());
+    let resp;
+    try {
+        const url = apiURL.toString();
+        console.log(url);
+        resp = await fetch(url);
+    } catch (err) {
+        console.log("fetch err", err);
+        throw err
+    }
     if(resp.status !== 200) {
         // throw with body (describes error)
         throw new Error("failed to get data from listing api: "+resp.body);
     }
 
-    return listingDec.decodePromise(resp.body);
+    const data = await resp.json();
+    return listingDec.decodePromise(data);
 };
 
 export const queryTask = async (taskKey: string): Promise<TaskData> => {
@@ -91,5 +107,8 @@ export const queryTask = async (taskKey: string): Promise<TaskData> => {
         throw new Error("failed to get data from task api: "+resp.body);
     }
 
-    return taskDec.decodePromise(resp.body);
+    const data = await resp.json();
+    return taskDec.decodePromise(data);
 };
+
+export const uploadEndpoint = apiEndpoint + '/upload';

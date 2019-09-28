@@ -40,7 +40,7 @@ import {Skeleton} from "@material-ui/lab";
 
 type TransitionState = {
     dirty: boolean,
-    crashesOnly: boolean,
+    hasFail: boolean,
     // task key
     taskKey: string,
     // if undefined, all spec versions are listed
@@ -101,6 +101,10 @@ const styles = (theme: Theme) => {
         configInput: {
             minWidth: '9em',
             maxWidth: '12em'
+        },
+        tableContainer: {
+            maxWidth: '100%',
+            overflowX: 'scroll',
         },
         tableHead: {
             backgroundColor: light ? '#ffcd4c' : '#1d1d1d',
@@ -194,7 +198,7 @@ class TransitionTable extends Component<TransitionProps, TransitionState> {
 
     state: Readonly<TransitionState> = {
         dirty: false,
-        crashesOnly: false,
+        hasFail: false,
         taskKey: "",
         specVersion: undefined,
         specConfig: undefined,
@@ -207,13 +211,17 @@ class TransitionTable extends Component<TransitionProps, TransitionState> {
         err: undefined
     };
 
+    componentDidMount(): void {
+        this.loadData();
+    }
+
     loadData = () => {
         this.setState({err: undefined, loading: true}, () => {
             queryListing({
                 clients: this.state.clientNames.map(name => ({name: name, version: this.state.clientVersions[name]})),
                 specVersion: this.state.specVersion,
                 specConfig: this.state.specConfig,
-                crashesOnly: this.state.crashesOnly,
+                hasFail: this.state.hasFail,
                 startAfter: this.state.startAfter,
                 endBefore: this.state.endBefore,
             }).then(listing => {
@@ -247,8 +255,8 @@ class TransitionTable extends Component<TransitionProps, TransitionState> {
         this.setState({clientNames: event.target.value as string[], dirty: true});
     };
 
-    handleChangeCrashesOnly = (event: React.ChangeEvent<HTMLInputElement>) => {
-        this.setState({crashesOnly: event.target.checked, dirty: true});
+    handleChangeHasFail = (event: React.ChangeEvent<HTMLInputElement>) => {
+        this.setState({hasFail: event.target.checked, dirty: true});
     };
 
     render() {
@@ -304,8 +312,8 @@ class TransitionTable extends Component<TransitionProps, TransitionState> {
                         <Grid item>
                             <FormControlLabel
                                 control={
-                                    <Switch checked={this.state.crashesOnly} color="primary"
-                                            onChange={this.handleChangeCrashesOnly} value="crashesOnly"/>
+                                    <Switch checked={this.state.hasFail} color="primary"
+                                            onChange={this.handleChangeHasFail} value="hasFail"/>
                                 }
                                 label="With crashes only"
                             />
@@ -365,6 +373,7 @@ class TransitionTable extends Component<TransitionProps, TransitionState> {
                         </div>
                     )
                     : (
+                        <div className={classes.tableContainer}>
                         <Table>
                             <TableHead className={classes.tableHead}>
                                 <TableRow>
@@ -407,6 +416,7 @@ class TransitionTable extends Component<TransitionProps, TransitionState> {
                                     }
                                 </TableBody>
                         </Table>
+                        </div>
                     )
                 }
                 <div className={classes.tableEnd}/>
