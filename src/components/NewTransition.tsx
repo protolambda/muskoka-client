@@ -17,7 +17,14 @@ import {
     WithStyles
 } from "@material-ui/core";
 import {SortableHandle, SortableContainer, SortableElement} from 'react-sortable-hoc';
-import {Alphabetical, ClockOutline, CubeOutline, Numeric, ReorderHorizontal} from "mdi-material-ui";
+import {
+    Alphabetical,
+    ClockOutline,
+    CubeOutline,
+    Ethereum,
+    Numeric,
+    ReorderHorizontal
+} from "mdi-material-ui";
 import arrayMove from 'array-move';
 import Moment from "react-moment";
 
@@ -35,6 +42,13 @@ const styles = (theme: Theme) => {
             width: "100%",
             backgroundColor: light ? '#ffcd4c' : '#1d1d1d',
             color: light ? '#333333' : '#cccccc',
+            padding: theme.spacing(2),
+            minHeight: 300,
+        },
+        headerIcon: {
+            width: '2.5rem',
+            height: '2.5rem',
+            margin: theme.spacing(1)
         },
         specVersionInput: {
             minWidth: '7em',
@@ -93,8 +107,8 @@ const SortableBlockItem = SortableElement((args: { value: File | undefined }) =>
                 secondary="?"
             />
             : <ListItemText
-                primary={args.value.name}
-                secondary={<span>Last modified on <Moment format="D MMM hh:mm:ss" unix>{args.value.lastModified.toString()}</Moment> ({sizeIntToString(args.value.size)})</span>}
+                primary={<span><strong>{args.value.name}</strong> ({sizeIntToString(args.value.size)})</span>}
+                secondary={<span>Last modified on <Moment format="D MMM hh:mm:ss" unix>{Math.floor(args.value.lastModified / 1000)}</Moment></span>}
             />
         }
         <ListItemSecondaryAction>
@@ -183,6 +197,18 @@ class NewTransition extends Component<Props, State> {
         const {classes} = this.props;
         return (
             <Paper className={classes.root}>
+                <div>
+                    <Grid container spacing={1} alignItems="center" justify="center">
+                        <Grid item>
+                            <Ethereum className={classes.headerIcon}/>
+                        </Grid>
+                        <Grid item>
+                            <Typography variant="h4" component="h2">Start a new ETH 2.0 test state-transition.</Typography>
+                            <Typography variant="body1" component="span">The state transition will become publicly available and processed by all ETH 2.0 clients with support for Muskoka.</Typography>
+                        </Grid>
+                    </Grid>
+                </div>
+                <br/>
                 <form
                     encType="multipart/form-data"
                     action="http://localhost:8080/upload"
@@ -217,7 +243,8 @@ class NewTransition extends Component<Props, State> {
                             <Typography variant="caption">
                                 {this.state.preStateFile === undefined
                                     ? <i>No pre-state selected yet.</i>
-                                    : <span>Selected <strong>{this.state.preStateFile.name}</strong></span>}
+                                    : <div>Selected <strong>{this.state.preStateFile.name}</strong> ({sizeIntToString(this.state.preStateFile.size)})<br/>
+                                    <span>Last modified on <Moment format="D MMM hh:mm:ss" unix>{Math.floor(this.state.preStateFile.lastModified / 1000)}</Moment></span></div>}
                             </Typography>
                         </Grid>
 
