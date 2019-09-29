@@ -3,7 +3,7 @@ import {JsonDecoder} from "ts.data.json";
 export type ResultData = {
     success: boolean,
     created: string,
-    clientVendor: string,
+    clientName: string,
     clientVersion: string,
     postHash: string
 }
@@ -14,17 +14,17 @@ export type TaskData = {
     specConfig: string,
     created: string,
     key: string, // to retrieve storage data with
-    result: Record<string, ResultData>,
+    results: Record<string, ResultData>,
 };
 
 const resultDec = JsonDecoder.object<ResultData>({
     success: JsonDecoder.boolean,
     created: JsonDecoder.string,
-    clientVendor: JsonDecoder.string,
+    clientName: JsonDecoder.string,
     clientVersion: JsonDecoder.string,
     postHash: JsonDecoder.string,
 }, 'result', {
-    clientVendor: 'client-vendor',
+    clientName: 'client-name',
     clientVersion: 'client-version',
     postHash: 'post-hash'
 });
@@ -37,7 +37,7 @@ const taskDec = JsonDecoder.object<TaskData>({
     specConfig: JsonDecoder.string,
     created: JsonDecoder.string,
     key: JsonDecoder.string,
-    result: JsonDecoder.oneOf<Record<string, ResultData>>([JsonDecoder.isUndefined({}), resultsDec], 'optional result-dict'),
+    results: JsonDecoder.oneOf<Record<string, ResultData>>([JsonDecoder.isUndefined({}), resultsDec], 'optional result-dict'),
 }, 'task', {
     specVersion: 'spec-version',
     specConfig: 'spec-config'

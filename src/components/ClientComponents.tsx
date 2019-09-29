@@ -2,23 +2,22 @@ import React from "react";
 import {Avatar, Chip} from "@material-ui/core";
 
 interface ClientIconProps {
-    clientVendor: string
+    clientName: string,
 }
 
-export const ClientIcon: React.FunctionComponent<ClientIconProps> = ({clientVendor}) => (
-    <Avatar alt={clientVendor} src={"/icons/" + clientVendor + ".png"} className="client-icon" component="span"/>);
+const knownClientNames = [
+    "artemis",
+    "harmony",
+    "lighthouse",
+    "lodestar",
+    "nimbus",
+    "prysm",
+    "pyspec",
+    "shasper",
+    "trinity",
+    "yeeth",
+    "zrnt",
+];
 
-interface ClientChipProps {
-    clientVendor: string
-    clientVersion: string
-}
-
-export const ClientChip: React.FunctionComponent<ClientChipProps> = ({clientVendor, clientVersion}) => (
-    <Chip
-        avatar={<ClientIcon clientVendor={clientVendor}/>}
-        label={(<span><strong>{clientVendor}</strong> <span>{clientVersion}</span></span>)}
-        className="client-chip"
-        component="a"
-        href={`/client/${clientVendor}/${clientVersion}`}
-        clickable
-    />);
+export const ClientIcon: React.FunctionComponent<ClientIconProps> = ({clientName}) => (
+    <img alt="#" src={"/icons/" + (knownClientNames.indexOf(clientName) < 0 ? "unknown.png" : clientName + ".png")} className="client-icon" style={{width: "100%"}}/>);

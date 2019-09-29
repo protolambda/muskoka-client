@@ -37,6 +37,7 @@ import Moment from 'react-moment';
 import {ClientIcon} from "./ClientComponents";
 import {queryListing, TaskData} from "../api";
 import {Skeleton} from "@material-ui/lab";
+import ResultSummary from "./ResultSummary";
 
 type TransitionState = {
     dirty: boolean,
@@ -188,8 +189,7 @@ const columns: Column[] = [
         id: 'clients',
         label: 'Results',
         minWidth: 400,
-        format: (value: TaskData) => (<div>{Object.entries(value.result).map(
-            ([k, v]) => (<ClientIcon key={k} clientVendor={v.clientVendor}/>))}</div>),
+        format: (value: TaskData) => (<ResultSummary results={value.results}/>),
         cellPlaceholder: () => (<Skeleton height={6} width="80%"/>)
     },
 ];
