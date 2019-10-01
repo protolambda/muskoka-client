@@ -4,12 +4,25 @@ export const clientNames = [
     'artemis', 'harmony', 'lighthouse', 'lodestar', 'nimbus', 'prysm', 'pyspec', 'shasper', 'trinity', 'yeeth', 'zrnt'
 ];
 
+export type ResultFilesData = {
+    postStateURL: string,
+    outLogURL: string,
+    errLogURL: string,
+}
+
+const filesDec = JsonDecoder.object<ResultFilesData>({
+    postStateURL: JsonDecoder.string,
+    outLogURL: JsonDecoder.string,
+    errLogURL: JsonDecoder.string,
+}, 'result-files');
+
 export type ResultData = {
     success: boolean,
     created: string,
     clientName: string,
     clientVersion: string,
-    postHash: string
+    postHash: string,
+    files?: ResultFilesData,
 }
 
 export type TaskData = {
@@ -27,6 +40,7 @@ const resultDec = JsonDecoder.object<ResultData>({
     clientName: JsonDecoder.string,
     clientVersion: JsonDecoder.string,
     postHash: JsonDecoder.string,
+    files: JsonDecoder.oneOf<undefined | ResultFilesData>([JsonDecoder.isUndefined(undefined), filesDec], 'optional files-dict'),
 }, 'result', {
     clientName: 'client-name',
     clientVersion: 'client-version',
@@ -65,7 +79,7 @@ export const queryListing = async (args: {
     const {clients, specVersion, specConfig, hasFail, startAfter, endBefore} = args;
     if(clients !== undefined) {
         for (const q of clients) {
-            params.set('client_'+q.name, q.version || 'all')
+            params.set('client-'+q.name, q.version || 'all')
         }
     }
     if(specVersion !== undefined) {
