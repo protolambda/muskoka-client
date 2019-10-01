@@ -1,5 +1,9 @@
 import {JsonDecoder} from "ts.data.json";
 
+export const clientNames = [
+    'artemis', 'harmony', 'lighthouse', 'lodestar', 'nimbus', 'prysm', 'pyspec', 'shasper', 'trinity', 'yeeth', 'zrnt'
+];
+
 export type ResultData = {
     success: boolean,
     created: string,

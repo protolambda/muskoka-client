@@ -35,7 +35,7 @@ import {
 } from "mdi-material-ui";
 import Moment from 'react-moment';
 import {ClientIcon} from "./ClientComponents";
-import {queryListing, TaskData} from "../api";
+import {clientNames, queryListing, TaskData} from "../api";
 import {Skeleton} from "@material-ui/lab";
 import ResultSummary from "./ResultSummary";
 
@@ -63,10 +63,6 @@ type TransitionState = {
     // when there is an error, undefined when no error.
     err: undefined | Error
 }
-
-const clientNames = [
-    'artemis', 'harmony', 'lighthouse', 'lodestar', 'nimbus', 'prysm', 'pyspec', 'shasper', 'trinity', 'yeeth', 'zrnt'
-];
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
