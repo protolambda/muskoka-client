@@ -24,7 +24,9 @@ const styles = (theme: Theme) => {
         result: {
             width: "3rem",
             height: "3rem",
-            position: "relative"
+            position: "relative",
+            backgroundColor: light ? "#999" : "#444",
+            borderRadius: "0.5rem",
         },
         resultIconWrap: {
             padding: theme.spacing(1),

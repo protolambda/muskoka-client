@@ -14,7 +14,11 @@ const filesDec = JsonDecoder.object<ResultFilesData>({
     postStateURL: JsonDecoder.string,
     outLogURL: JsonDecoder.string,
     errLogURL: JsonDecoder.string,
-}, 'result-files');
+}, 'result-files', {
+    postStateURL: 'post-state',
+    outLogURL: 'out-log',
+    errLogURL: 'err-log',
+});
 
 export type ResultData = {
     success: boolean,
@@ -40,7 +44,7 @@ const resultDec = JsonDecoder.object<ResultData>({
     clientName: JsonDecoder.string,
     clientVersion: JsonDecoder.string,
     postHash: JsonDecoder.string,
-    files: JsonDecoder.oneOf<undefined | ResultFilesData>([JsonDecoder.isUndefined(undefined), filesDec], 'optional files-dict'),
+    files: filesDec,
 }, 'result', {
     clientName: 'client-name',
     clientVersion: 'client-version',
