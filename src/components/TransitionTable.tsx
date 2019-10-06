@@ -34,12 +34,11 @@ import {
     Tag
 } from "mdi-material-ui";
 import Moment from 'react-moment';
-import {ClientIcon} from "./ClientComponents";
 import {clientNames, queryListing, TaskData} from "../api";
 import {Skeleton} from "@material-ui/lab";
 import ResultSummary from "./ResultSummary";
 
-type TransitionState = {
+type TransitionTableState = {
     dirty: boolean,
     hasFail: boolean,
     // task key
@@ -136,11 +135,15 @@ const styles = (theme: Theme) => {
             height: theme.spacing(1),
             borderBottomLeftRadius: theme.spacing(1),
             borderBottomRightRadius: theme.spacing(1),
+        },
+        navFab: {
+            backgroundColor: light ? '#ffcd4c' : '#1d1d1d',
+            color: light ? "#fff" : "#999"
         }
     });
 };
 
-interface TransitionProps extends WithStyles<typeof styles> {
+interface TransitionTableProps extends WithStyles<typeof styles> {
 }
 
 interface Column {
@@ -190,9 +193,9 @@ const columns: Column[] = [
     },
 ];
 
-class TransitionTable extends Component<TransitionProps, TransitionState> {
+class TransitionTable extends Component<TransitionTableProps, TransitionTableState> {
 
-    state: Readonly<TransitionState> = {
+    state: Readonly<TransitionTableState> = {
         dirty: false,
         hasFail: false,
         taskKey: "",
@@ -389,7 +392,7 @@ class TransitionTable extends Component<TransitionProps, TransitionState> {
                                     {this.state.loading
                                         ? (
                                             [...Array(20)].map((_, i) => (
-                                                <TableRow hover role="checkbox" tabIndex={-1} key={'el' + i}>
+                                                <TableRow hover tabIndex={-1} key={'el' + i}>
                                                     {columns.map(column => (
                                                         <TableCell key={column.id} className={classes.tableCell} align="left">
                                                             {column.cellPlaceholder()}
@@ -400,7 +403,7 @@ class TransitionTable extends Component<TransitionProps, TransitionState> {
                                         )
                                         : (
                                             this.state.data && this.state.data.map(task => (
-                                                <TableRow hover role="checkbox" tabIndex={-1} key={task.key}>
+                                                <TableRow hover tabIndex={-1} key={task.key}>
                                                     {columns.map(column => (
                                                         <TableCell key={column.id} className={classes.tableCell} align="left">
                                                             {column.format(task)}
@@ -418,10 +421,10 @@ class TransitionTable extends Component<TransitionProps, TransitionState> {
                 <div className={classes.tableEnd}/>
                 {this.state.data && this.state.data.length > 0 &&
                 <div className={classes.tableNav}>
-                    <Fab color="secondary" aria-label="edit">
+                    <Fab className={classes.navFab} aria-label="edit">
                         <ArrowLeft/>
                     </Fab>
-                    <Fab color="secondary" aria-label="edit">
+                    <Fab className={classes.navFab} aria-label="edit">
                         <ArrowRight/>
                     </Fab>
                 </div>
