@@ -1,5 +1,4 @@
 import React from "react";
-import {Avatar, Chip} from "@material-ui/core";
 import {clientNames} from "../api";
 
 interface ClientIconProps {

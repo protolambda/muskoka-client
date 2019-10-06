@@ -10,7 +10,7 @@ import {
     WithStyles,
     withStyles
 } from "@material-ui/core";
-import {ResultData} from "../api";
+import {orderedResults, ResultData} from "../api";
 import Moment from "react-moment";
 import {ClientIcon} from "./ClientComponents";
 
@@ -83,72 +83,35 @@ const postHashCountColors = [
 ];
 
 const ResultSummary: React.FC<Props> = ({classes, results}) => {
-    const byPostHash: Record<string, Array<ResultData>> = {};
-    mainLoop: for (const r of Object.values(results)) {
-        if (!byPostHash.hasOwnProperty(r.postHash)) {
-            byPostHash[r.postHash] = [];
-        }
-        const arr = byPostHash[r.postHash];
-        // some tasks may run more than once because of pubsub delivery acknowledgement delays. Spot them (if they have the same data), and ignore the duplicates
-        for (const other of arr) {
-            if (other.success === r.success && other.clientName === r.clientName && other.clientVersion === r.clientVersion) {
-                continue mainLoop;
-            }
-        }
-        arr.push(r);
-    }
-    const orderedPostHashes = Object.keys(byPostHash).sort((ka, kb) => {
-        const a = byPostHash[ka];
-        const b = byPostHash[kb];
-        for (const v of a) {
-            // canonical spec to the left
-            if (v.clientName == "pyspec") {
-                return -1;
-            }
-            // failures to the right
-            if (!v.success) {
-                return 1;
-            }
-        }
-        for (const v of b) {
-            // canonical spec to the left
-            if (v.clientName == "pyspec") {
-                return 1;
-            }
-            // failures to the right
-            if (!v.success) {
-                return -1;
-            }
-        }
-        return ka.localeCompare(kb);
-    });
+    const ordered = orderedResults(results);
     return (
-        <div className={classes.root} style={{borderWidth: "2px", borderColor: postHashCountColors[Math.min(Object.keys(byPostHash).length, postHashCountColors.length - 1)]}}>
-            {orderedPostHashes.map(k => {
-                const v = byPostHash[k];
+        <div className={classes.root} style={{borderWidth: "2px", borderColor: postHashCountColors[Math.min(Object.keys(ordered).length, postHashCountColors.length - 1)]}}>
+            {ordered.map(g => {
                 return (
-                    <div key={k} className={classes.resultGroup}>
-                        {v.map((v) => (
-                            <Tooltip title={
-                                <List className={classes.root}>
-                                    <ListItem>
-                                        <ListItemAvatar className={classes.clientTooltipAvatar}>
-                                            <ClientIcon clientName={v.clientName}/>
-                                        </ListItemAvatar>
-                                        <ListItemText primary={<strong>{v.clientName}</strong>} secondary={
-                                            <div className={classes.clientTooltipData}>
-                                                <strong>{v.clientVersion}</strong><br/>
-                                                <Moment fromNow>{v.created}</Moment>
-                                            </div>} />
-                                    </ListItem>
-                                </List>}>
-                                <div className={classes.result}>
-                                    <div className={classes.resultIconWrap}>
-                                        <ClientIcon clientName={v.clientName}/>
+                    <div key={g.postHash} className={classes.resultGroup}>
+                        {g.results.map((v) => (
+                            <div key={v.key}>
+                                <Tooltip title={
+                                    <List className={classes.root}>
+                                        <ListItem>
+                                            <ListItemAvatar className={classes.clientTooltipAvatar}>
+                                                <ClientIcon clientName={v.data.clientName}/>
+                                            </ListItemAvatar>
+                                            <ListItemText primary={<strong>{v.data.clientName}</strong>} secondary={
+                                                <div className={classes.clientTooltipData}>
+                                                    <strong>{v.data.clientVersion}</strong><br/>
+                                                    <Moment fromNow>{v.data.created}</Moment>
+                                                </div>} />
+                                        </ListItem>
+                                    </List>}>
+                                    <div className={classes.result}>
+                                        <div className={classes.resultIconWrap}>
+                                            <ClientIcon clientName={v.data.clientName}/>
+                                        </div>
+                                        <div className={classes.resultOverlay + (v.data.success ? "" : " " + classes.failResult)}/>
                                     </div>
-                                    <div className={classes.resultOverlay + (v.success ? "" : " " + classes.failResult)}/>
-                                </div>
-                            </Tooltip>
+                                </Tooltip>
+                            </div>
                         ))}
                     </div>
                 )

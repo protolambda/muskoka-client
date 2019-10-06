@@ -37,6 +37,8 @@ import Moment from 'react-moment';
 import {clientNames, queryListing, TaskData} from "../api";
 import {Skeleton} from "@material-ui/lab";
 import ResultSummary from "./ResultSummary";
+import {Link} from "react-router-dom";
+import KeyDisplay from "./KeyDisplay";
 
 type TransitionTableState = {
     dirty: boolean,
@@ -158,29 +160,34 @@ const columns: Column[] = [
     {
         id: 'key',
         label: 'Key',
-        format: (value: TaskData) => value.key,
+        minWidth: 200,
+        format: (value: TaskData) => (<Link to={'/task/' + value.key} style={{textDecoration: 'none', color: 'inherit'}}><KeyDisplay>{value.key}</KeyDisplay></Link>),
         cellPlaceholder: () => (<Skeleton height={6} width="80%"/>)
     },
     {
         id: 'spec-version',
         label: 'Spec Version',
+        minWidth: 60,
         format: (value: TaskData) => value.specVersion,
         cellPlaceholder: () => (<Skeleton height={6} width="50%"/>)
     },
     {
         id: 'spec-config',
         label: 'Spec Config',
+        minWidth: 80,
         format: (value: TaskData) => value.specConfig,
         cellPlaceholder: () => (<Skeleton height={6} width="50%"/>)
     },
     {
         id: 'blocks',
         label: <CubeOutline style={{position: 'relative', top: '0.15em'}}/>,
+        minWidth: 30,
         format: (value: TaskData) => value.blocks,
         cellPlaceholder: () => (<Skeleton height={6} width="30%"/>)
     },
     {
         id: 'time', label: 'Time ago',
+        minWidth: 50,
         format: (value: TaskData) => <Moment fromNow>{value.created}</Moment>,
         cellPlaceholder: () => (<Skeleton height={6} width="60%"/>)
     },

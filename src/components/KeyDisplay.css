@@ -1,0 +1,11 @@
+.key-container {
+    width: 70px;
+    display: block;
+    overflow: hidden;
+    word-break: keep-all;
+    text-overflow: ellipsis;
+}
+
+.key-container:hover {
+    width: 100%
+}

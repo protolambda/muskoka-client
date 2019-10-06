@@ -1,44 +1,37 @@
 import React, {Component} from 'react';
 import {
-    Button,
-    Checkbox,
-    createStyles,
-    Fab,
-    FormControl,
-    FormControlLabel,
     Grid,
-    Input,
-    InputLabel, LinearProgress,
-    ListItemText,
-    MenuItem,
-    Select,
-    Switch,
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableRow,
-    TextField,
+    Button,
+    IconButton,
+    LinearProgress,
+    List, ListItem, ListItemIcon, ListItemText,
+    Table, TableBody, TableCell, TableHead, TableRow,
     Theme, Typography,
+    createStyles,
     withStyles,
     WithStyles
 } from "@material-ui/core";
 import {
     Alert,
-    ArrowLeft,
-    ArrowRight, CalendarClock, CheckOutline,
-    CubeOutline,
+    CalendarClock, CheckBold, CloudDownload,
+    CubeOutline, Download,
     FileDocumentBox,
-    FileSettingsVariantOutline,
-    Git,
-    Magnify,
+    FileSettingsVariantOutline, FlagOutline,
     Tag
 } from "mdi-material-ui";
 import Moment from 'react-moment';
 import {ClientIcon} from "./ClientComponents";
-import {clientNames, queryListing, queryTask, ResultData, TaskData} from "../api";
+import {
+    getBlocksInputURL,
+    getPreStateInputURL, orderedResults,
+    queryTask,
+    ResultData,
+    TaskData
+} from "../api";
 import {Skeleton} from "@material-ui/lab";
-import ResultSummary from "./ResultSummary";
+import KeyDisplay from "./KeyDisplay";
+import TransitionDetail from "./TransitionDetail";
+import {Link} from "react-router-dom";
 
 type TaskPageState = {
     // loaded data
@@ -55,12 +48,22 @@ const styles = (theme: Theme) => {
         taskGeneralContainer: {
             backgroundColor: light ? '#ffcd4c' : '#1d1d1d',
             color: light ? '#333333' : '#cccccc',
-            paddingTop: theme.spacing(1),
-            paddingBottom: theme.spacing(1),
-            paddingLeft: theme.spacing(2),
-            paddingRight: theme.spacing(2),
+            paddingTop: theme.spacing(2),
+            paddingBottom: theme.spacing(2),
+            paddingLeft: theme.spacing(4),
+            paddingRight: theme.spacing(4),
             borderTopLeftRadius: theme.spacing(1),
             borderTopRightRadius: theme.spacing(1),
+        },
+        transitionDetail: {
+            width: '100%',
+        },
+        downloadBtn: {
+            margin: theme.spacing(1),
+        },
+        blocksDownloadLink: {
+            textDecoration: 'none',
+            color: 'inherit',
         },
         tableContainer: {
             maxWidth: '100%',
@@ -117,7 +120,7 @@ type ResultEntry = {
 }
 
 interface Column {
-    id: 'key' | 'client-name' | 'client-version' | 'time' | 'success' | 'post-hash';
+    id: 'key' | 'client-name' | 'client-version' | 'time' | 'success' | 'post-hash' | 'post-download' | 'out-view' | 'err-view';
     label: any;
     minWidth?: number;
     format: (value: ResultEntry) => any;
@@ -128,14 +131,25 @@ const columns: Column[] = [
     {
         id: 'key',
         label: 'Key',
-        format: (value: ResultEntry) => value.key,
+        format: (value: ResultEntry) => <KeyDisplay>{value.key}</KeyDisplay>,
         cellPlaceholder: () => (<Skeleton height={6} width="80%"/>)
     },
     {
         id: 'client-name',
         label: 'Client',
-        format: (value: ResultEntry) => value.data.clientName,
-        cellPlaceholder: () => (<Skeleton height={6} width="80%"/>)
+        minWidth: 200,
+        format: (value: ResultEntry) =>
+            <Grid container spacing={2} alignItems="center">
+                <Grid item>
+                    <div style={{width: '2rem'}}>
+                        <ClientIcon clientName={value.data.clientName}/>
+                    </div>
+                </Grid>
+                <Grid item>
+                    {value.data.clientName}
+                </Grid>
+            </Grid>,
+        cellPlaceholder: () => (<span><Skeleton height={10} width={10}/> <Skeleton height={6} width="80%"/></span>)
     },
     {
         id: 'client-version',
@@ -146,23 +160,58 @@ const columns: Column[] = [
     {
         id: 'time',
         label: 'Time ago',
+        minWidth: 110,
         format: (value: ResultEntry) => <Moment fromNow>{value.data.created}</Moment>,
         cellPlaceholder: () => (<Skeleton height={6} width="60%"/>)
     },
     {
         id: 'success',
-        label: <CubeOutline style={{position: 'relative', top: '0.15em'}}/>,
-        format: (value: ResultEntry) => value.data.success ? <CheckOutline/> : <Alert/>,
+        label: <FlagOutline style={{position: 'relative', top: '0.15em'}}/>,
+        minWidth: 40,
+        format: (value: ResultEntry) => value.data.success ? <CheckBold/> : <Alert/>,
         cellPlaceholder: () => (<Skeleton height={6} width="30%"/>)
     },
     {
         id: 'post-hash',
         label: 'Post-hash',
-        minWidth: 400,
-        format: (value: ResultEntry) => (<code>{value.data.postHash}</code>),
+        format: (value: ResultEntry) => (<KeyDisplay>{value.data.postHash}</KeyDisplay>),
         cellPlaceholder: () => (<Skeleton height={6} width="80%"/>)
     },
+    {
+        id: 'post-download',
+        label: 'Post state',
+        format: (value: ResultEntry) => (
+            <IconButton aria-label="download-post" href={value.data.files.postStateURL}>
+                <Download/>
+            </IconButton>
+        ),
+        cellPlaceholder: () => (<Skeleton height={6} width={6}/>)
+    },
+    {
+        id: 'out-view',
+        label: 'Log',
+        // TODO open dialog with log in iframe
+        format: (value: ResultEntry) => (
+            <IconButton aria-label="out-view" onClick={() => null}>
+                <Download/>
+            </IconButton>
+        ),
+        cellPlaceholder: () => (<Skeleton height={6} width={6}/>)
+    },
+    {
+        id: 'err-view',
+        label: 'Error Log',
+        // TODO open dialog with log in iframe
+        format: (value: ResultEntry) => (
+            <IconButton aria-label="err-view" onClick={() => null}>
+                <Download/>
+            </IconButton>
+        ),
+        cellPlaceholder: () => (<Skeleton height={6} width={6}/>)
+    },
+
 ];
+
 
 class TaskPage extends Component<TaskPageProps, TaskPageState> {
 
@@ -189,75 +238,77 @@ class TaskPage extends Component<TaskPageProps, TaskPageState> {
 
     render() {
         const {classes} = this.props;
+        const ordered = this.state.task && this.state.task.results ? orderedResults(this.state.task.results) : null;
+
         return (
             <>
                 <div className={classes.taskGeneralContainer}>
-                    <Grid container spacing={4} alignItems="flex-end">
+                    <Typography variant="h3">
+                        Transition task
+                    </Typography>
+                    <br/>
+                    <Grid container spacing={4} alignItems="flex-start" justify="space-between">
                         <Grid item>
-                            <Grid container spacing={1} alignItems="flex-end">
-                                <Grid item>
-                                    <FileDocumentBox/>
-                                </Grid>
-                                <Grid item>
-                                    <Typography variant="body2">Task key:</Typography>
-                                    <Typography variant="body2">{this.props.taskKey}</Typography>}
-                                </Grid>
-                            </Grid>
+                            <TransitionDetail icon={<FileDocumentBox/>} label="Task key"
+                                              value={<KeyDisplay>{this.props.taskKey}</KeyDisplay>} skeletonWidth={0}/>
+                            <TransitionDetail icon={<FileSettingsVariantOutline/>} label="Spec config"
+                                              value={this.state.task && this.state.task.specConfig} skeletonWidth={40}/>
+                            <TransitionDetail icon={<Tag/>} label="Spec version"
+                                              value={this.state.task && this.state.task.specVersion}
+                                              skeletonWidth={40}/>
+                            <TransitionDetail icon={<CubeOutline/>} label="Blocks"
+                                              value={this.state.task && this.state.task.blocks} skeletonWidth={20}/>
+                            <TransitionDetail icon={<CalendarClock/>} label="Time ago" value={this.state.task &&
+                            <Moment fromNow>{this.state.task.created}</Moment>} skeletonWidth={50}/>
+                            <TransitionDetail icon={<FileSettingsVariantOutline/>} label="Spec config"
+                                              value={this.state.task && this.state.task.specConfig} skeletonWidth={40}/>
                         </Grid>
-
                         <Grid item>
-                            <Grid container spacing={1} alignItems="flex-end">
-                                <Grid item>
-                                    <FileSettingsVariantOutline/>
-                                </Grid>
-                                <Grid item>
-                                    <Typography variant="body2">Spec config:</Typography>
-                                    {this.state.task ? <Typography variant="body2">{this.state.task.specConfig}</Typography> : <Skeleton height={6} width={40}/>}
-                                </Grid>
-                            </Grid>
+                            <Typography variant="h6">
+                                Pre-state
+                            </Typography>
+                            <Button
+                                variant="outlined"
+                                color="default"
+                                className={classes.downloadBtn}
+                                startIcon={<CloudDownload/>}
+                                href={this.state.task ? getPreStateInputURL(this.props.taskKey, this.state.task.specVersion, this.state.task.specConfig) : "/"}
+                                disabled={!this.state.task}>
+                                Download
+                            </Button>
                         </Grid>
-
                         <Grid item>
-                            <Grid container spacing={1} alignItems="flex-end">
-                                <Grid item>
-                                    <Tag/>
-                                </Grid>
-                                <Grid item>
-                                    <Typography variant="body2">Spec version:</Typography>
-                                    {this.state.task ? <Typography variant="body2">{this.state.task.specVersion}</Typography> : <Skeleton height={6} width={20}/>}
-                                </Grid>
-                            </Grid>
-                        </Grid>
-
-
-                        <Grid item>
-                            <Grid container spacing={1} alignItems="flex-end">
-                                <Grid item>
-                                    <CubeOutline/>
-                                </Grid>
-                                <Grid item>
-                                    <Typography variant="body2">Blocks:</Typography>
-                                    {this.state.task ? <Typography variant="body2">{this.state.task.blocks}</Typography> : <Skeleton height={6} width={10}/>}
-                                </Grid>
-                            </Grid>
-                        </Grid>
-
-
-                        <Grid item>
-                            <Grid container spacing={1} alignItems="flex-end">
-                                <Grid item>
-                                    <CalendarClock/>
-                                </Grid>
-                                <Grid item>
-                                    <Typography variant="body2">Time ago:</Typography>
-                                    {this.state.task ? <Typography variant="body2"><Moment fromNow>{this.state.task.created}</Moment></Typography> : <Skeleton height={6} width={30}/>}
-                                </Grid>
-                            </Grid>
+                            <Typography variant="h6">
+                                Blocks
+                            </Typography>
+                            {this.state.task &&
+                            <List dense={true}>
+                                {([...(new Array(this.state.task.blocks))]).map((_, i) =>
+                                    <Link
+                                        // @ts-ignore
+                                        to={getBlocksInputURL(i)(this.props.taskKey, this.state.task.specVersion, this.state.task.specConfig)}
+                                        className={classes.blocksDownloadLink}>
+                                        <ListItem key={"block-download-" + i}>
+                                            <ListItemIcon>
+                                                <CloudDownload/>
+                                            </ListItemIcon>
+                                            <ListItemText
+                                                primary={"Download Block #" + i}
+                                            />
+                                        </ListItem>
+                                    </Link>,
+                                )}
+                            </List>
+                            }
                         </Grid>
                     </Grid>
+                    <br/>
+                    <Typography variant="h3">
+                        Results
+                    </Typography>
                 </div>
                 {this.state.loading && (
-                    <LinearProgress color="primary" />
+                    <LinearProgress color="primary"/>
                 )}
                 {!!this.state.err
                     ? (
@@ -267,51 +318,50 @@ class TaskPage extends Component<TaskPageProps, TaskPageState> {
                     )
                     : (
                         <div className={classes.tableContainer}>
-                        <Table>
-                            <TableHead className={classes.tableHead}>
-                                <TableRow>
-                                    {columns.map(column => (
-                                        <TableCell
-                                            key={column.id}
-                                            align="left"
-                                            className={classes.tableHeadCell}
-                                            style={{minWidth: column.minWidth}}
-                                        >
-                                            {column.label}
-                                        </TableCell>
-                                    ))}
-                                </TableRow>
-                            </TableHead>
+                            <Table>
+                                <TableHead className={classes.tableHead}>
+                                    <TableRow>
+                                        {columns.map(column => (
+                                            <TableCell
+                                                key={column.id}
+                                                align="left"
+                                                className={classes.tableHeadCell}
+                                                style={{minWidth: column.minWidth}}
+                                            >
+                                                {column.label}
+                                            </TableCell>
+                                        ))}
+                                    </TableRow>
+                                </TableHead>
                                 <TableBody className={classes.tableBody}>
                                     {this.state.loading
                                         ? (
                                             [...Array(8)].map((_, i) => (
                                                 <TableRow hover tabIndex={-1} key={'el' + i}>
                                                     {columns.map(column => (
-                                                        <TableCell key={column.id} className={classes.tableCell} align="left">
+                                                        <TableCell key={column.id} className={classes.tableCell}
+                                                                   align="left">
                                                             {column.cellPlaceholder()}
                                                         </TableCell>
                                                     ))}
                                                 </TableRow>
                                             ))
                                         )
-                                        : (
-                                            this.state.task && this.state.task.results && Object.entries(this.state.task.results).map(([key, data]) => (
-                                                <TableRow hover tabIndex={-1} key={key}>
-                                                    {columns.map(column => (
-                                                        <TableCell key={column.id} className={classes.tableCell} align="left">
-                                                            {column.format({
-                                                                key: key,
-                                                                data: data,
-                                                            })}
-                                                        </TableCell>
-                                                    ))}
-                                                </TableRow>
-                                                ))
-                                        )
+                                        : (ordered && ordered.flatMap(entry => (entry.results.map((r, i) => (
+                                            // Group results with the same post-hash.
+                                            <TableRow hover tabIndex={-1} key={r.key}
+                                                      style={i == entry.results.length - 1 ? {marginBottom: '1rem'} : {}}>
+                                                {columns.map(column => (
+                                                    <TableCell key={column.id} className={classes.tableCell}
+                                                               align="left">
+                                                        {column.format(r)}
+                                                    </TableCell>
+                                                ))}
+                                            </TableRow>
+                                        )))))
                                     }
                                 </TableBody>
-                        </Table>
+                            </Table>
                         </div>
                     )
                 }

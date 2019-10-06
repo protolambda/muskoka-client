@@ -26,7 +26,7 @@ export type ResultData = {
     clientName: string,
     clientVersion: string,
     postHash: string,
-    files?: ResultFilesData,
+    files: ResultFilesData,
 }
 
 export type TaskData = {
@@ -130,7 +130,63 @@ export const queryTask = async (taskKey: string): Promise<TaskData> => {
     }
 
     const data = await resp.json();
+    data['key'] = taskKey;
     return taskDec.decodePromise(data);
 };
 
 export const uploadEndpoint = apiEndpoint + '/upload';
+
+
+const storageAPI = "https://storage.googleapis.com";
+const inputBucketName = "muskoka-transitions";
+
+const getInputUrl = (inputKey: string) => (taskKey: string, specVersion: string, specConfig: string) => [storageAPI, inputBucketName, specVersion, specConfig, taskKey, inputKey].join("/");
+
+export const getPreStateInputURL = getInputUrl("pre.ssz");
+export const getBlocksInputURL = (blockIndex: number) => getInputUrl("block_" + blockIndex + ".ssz");
+
+export const orderedResults = (results: Record<string, ResultData>): Array<{postHash: string, results: Array<{key: string, data: ResultData}>}> => {
+    const byPostHash: Record<string, Array<{key: string, data: ResultData}>> = {};
+    mainLoop: for (const [k, r] of Object.entries(results)) {
+        if (!byPostHash.hasOwnProperty(r.postHash)) {
+            byPostHash[r.postHash] = [];
+        }
+        const arr = byPostHash[r.postHash];
+        // some tasks may run more than once because of pubsub delivery acknowledgement delays. Spot them (if they have the same data), and ignore the duplicates
+        for (const other of arr) {
+            if (other.data.success === r.success && other.data.clientName === r.clientName && other.data.clientVersion === r.clientVersion) {
+                continue mainLoop;
+            }
+        }
+        arr.push({key: k, data: r});
+    }
+    const orderedPostHashes = Object.keys(byPostHash).sort((ka, kb) => {
+        const a = byPostHash[ka];
+        const b = byPostHash[kb];
+        for (const v of a) {
+            // canonical spec to the left
+            if (v.data.clientName === "pyspec") {
+                return -1;
+            }
+            // failures to the right
+            if (!v.data.success) {
+                return 1;
+            }
+        }
+        for (const v of b) {
+            // canonical spec to the left
+            if (v.data.clientName === "pyspec") {
+                return 1;
+            }
+            // failures to the right
+            if (!v.data.success) {
+                return -1;
+            }
+        }
+        return ka.localeCompare(kb);
+    });
+    return orderedPostHashes.map(h => ({
+        postHash: h,
+        results: byPostHash[h]
+    }));
+};
