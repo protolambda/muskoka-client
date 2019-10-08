@@ -30,6 +30,7 @@ export type ResultData = {
 }
 
 export type TaskData = {
+    index: number,
     blocks: number,
     specVersion: string,
     specConfig: string,
@@ -54,6 +55,7 @@ const resultDec = JsonDecoder.object<ResultData>({
 const resultsDec = JsonDecoder.dictionary<ResultData>(resultDec, 'results');
 
 const taskDec = JsonDecoder.object<TaskData>({
+    index: JsonDecoder.number,
     blocks: JsonDecoder.number,
     specVersion: JsonDecoder.string,
     specConfig: JsonDecoder.string,
@@ -65,42 +67,30 @@ const taskDec = JsonDecoder.object<TaskData>({
     specConfig: 'spec-config'
 });
 
-const listingDec = JsonDecoder.array<TaskData>(taskDec, 'listing');
+const listingTasksDec = JsonDecoder.array<TaskData>(taskDec, 'listing tasks');
 
 // TODO change to '', to query from site root url. (api running on same domain as website is hosted)
 const apiEndpoint = 'http://localhost:8080';
 
-export type ClientQuery = {
-    name: string,
-    version: undefined | string,
-};
+export type ListingResult = {
+    tasks: Array<TaskData>,
+    hasPrevPage: boolean,
+    hasNextPage: boolean,
+}
 
-export const queryListing = async (args: {
-    clients?: Array<ClientQuery>, specVersion?: string, specConfig?: string,
-    hasFail?: boolean, startAfter?: string, endBefore?: string}): Promise<Array<TaskData>> => {
+const listingResultsDec = JsonDecoder.object<ListingResult>({
+    tasks: listingTasksDec,
+    hasPrevPage: JsonDecoder.boolean,
+    hasNextPage: JsonDecoder.boolean,
+}, 'listing result', {
+    hasPrevPage: 'has-prev-page',
+    hasNextPage: 'has-next-page',
+});
+
+export const queryListing = async (searchState: ListingSearchState): Promise<{listing: ListingResult, params: URLSearchParams}> => {
     const apiURL = new URL(apiEndpoint + '/listing');
     const params = apiURL.searchParams;
-    const {clients, specVersion, specConfig, hasFail, startAfter, endBefore} = args;
-    if(clients !== undefined) {
-        for (const q of clients) {
-            params.set('client-'+q.name, q.version || 'all')
-        }
-    }
-    if(specVersion !== undefined) {
-        params.set('spec-version', specVersion);
-    }
-    if(specConfig !== undefined) {
-        params.set('spec-config', specConfig);
-    }
-    if(hasFail) {
-        params.set('has-fail', 'true');
-    }
-    if(startAfter !== undefined) {
-        params.set('after', startAfter);
-    }
-    if(endBefore !== undefined) {
-        params.set('before', endBefore);
-    }
+    listingSearchStateToParams(searchState, params);
     let resp;
     try {
         const url = apiURL.toString();
@@ -116,7 +106,82 @@ export const queryListing = async (args: {
     }
 
     const data = await resp.json();
-    return listingDec.decodePromise(data);
+    return listingResultsDec.decodePromise(data).then(res => ({listing: res, params: params}));
+};
+
+export type ListingSearchState = {
+    // if undefined, all spec versions are listed
+    specVersion?: string,
+    // if undefined, all spec configs are listed
+    specConfig?: string,
+    // <clientName> --> <clientVersion>. If none, all versions apply.
+    clients: Record<string, string | undefined>,
+    // if the results should be filtered to only contain fails.
+    hasFail: boolean,
+    // paginate backwards by stopping *before* (i.e. excl) a given result
+    before?: number,
+    // paginate forwards by continuing *after* (i.e. excl) a given result
+    after?: number
+}
+
+export const listingSearchParamsToState = (paramsStr: string): ListingSearchState => {
+    const params = new URLSearchParams(paramsStr);
+    const version = params.get('spec-version');
+    const config = params.get('spec-config');
+    const after = params.get('after');
+    const before = params.get('before');
+    const state: ListingSearchState = {
+        specVersion: version ? version : undefined,
+        specConfig: config ? config : undefined,
+        clients: {},
+        hasFail: params.get('has-fail') === 'true',
+        after: after ? parseInt(after) : undefined,
+        before: before ? parseInt(before) : undefined,
+    };
+    params.forEach((v, k) => {
+        if (k.startsWith('client-')) {
+            state.clients[k.substring('client-'.length)] = v;
+        }
+    });
+    return state;
+};
+
+export const listingSearchStateToParams = (state: ListingSearchState, params: URLSearchParams) => {
+    if(state.specVersion !== undefined) {
+        params.set('spec-version', state.specVersion);
+    } else {
+        params.delete('spec-version');
+    }
+    if(state.specConfig !== undefined) {
+        params.set('spec-config', state.specConfig);
+    } else {
+        params.delete('spec-config');
+    }
+    params.forEach((v, k) => {
+        if (k.startsWith('client-')) {
+            const name = k.substring('client-'.length);
+            params.delete(name);
+        }
+    });
+    Object.entries(state.clients).forEach(([k, v]) => {
+        params.set('client-'+k, v ? v : 'all');
+    });
+    if (state.hasFail) {
+        params.set('has-fail', 'true');
+    } else {
+        // default to false, just leave it out.
+        params.delete('has-fail');
+    }
+    if(state.after !== undefined) {
+        params.set('after', state.after.toString());
+    } else {
+        params.delete('after');
+    }
+    if(state.before !== undefined) {
+        params.set('before', state.before.toString());
+    } else {
+        params.delete('before')
+    }
 };
 
 export const queryTask = async (taskKey: string): Promise<TaskData> => {

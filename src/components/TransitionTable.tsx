@@ -34,31 +34,27 @@ import {
     Tag
 } from "mdi-material-ui";
 import Moment from 'react-moment';
-import {clientNames, queryListing, TaskData} from "../api";
+import {
+    clientNames,
+    ListingResult,
+    listingSearchParamsToState,
+    ListingSearchState,
+    queryListing,
+    TaskData
+} from "../api";
 import {Skeleton} from "@material-ui/lab";
 import ResultSummary from "./ResultSummary";
-import {Link} from "react-router-dom";
+import {Link, withRouter} from "react-router-dom";
+import {RouteComponentProps} from "react-router";
 import KeyDisplay from "./KeyDisplay";
 
 type TransitionTableState = {
     dirty: boolean,
-    hasFail: boolean,
     // task key
     taskKey: string,
-    // if undefined, all spec versions are listed
-    specVersion: undefined | string,
-    // if undefined, all spec configs are listed
-    specConfig: undefined | string,
-    // if empty, all clients are listed
-    clientNames: Array<string>,
-    // <clientName> --> <clientVersion>
-    clientVersions: Record<string, string>,
+    searchState: ListingSearchState,
     // if undefined, the data needs to be loaded.
-    data: undefined | Array<TaskData>,
-    // for pagination (without numbering, based on relative order). Undefined = no specific start
-    startAfter: undefined | string,
-    // for pagination (without numbering, based on relative order). Undefined = no specific end
-    endBefore: undefined | string,
+    listing: undefined | ListingResult,
     // true when data is loading.
     loading: boolean,
     // when there is an error, undefined when no error.
@@ -145,8 +141,13 @@ const styles = (theme: Theme) => {
     });
 };
 
-interface TransitionTableProps extends WithStyles<typeof styles> {
+// Router params, aka 'this.props.match.params.*'
+type TransitionTableParams = {
+    before?: string,
+    after?: string,
 }
+
+type TransitionTableProps = WithStyles<typeof styles> & RouteComponentProps<TransitionTableParams> & {}
 
 interface Column {
     id: 'key' | 'time' | 'spec-version' | 'spec-config' | 'blocks' | 'clients';
@@ -161,7 +162,10 @@ const columns: Column[] = [
         id: 'key',
         label: 'Key',
         minWidth: 200,
-        format: (value: TaskData) => (<Link to={'/task/' + value.key} style={{textDecoration: 'none', color: 'inherit'}}><KeyDisplay>{value.key}</KeyDisplay></Link>),
+        format: (value: TaskData) => (<Link to={'/task/' + value.key} style={{
+            textDecoration: 'none',
+            color: 'inherit'
+        }}><KeyDisplay>{value.key}</KeyDisplay></Link>),
         cellPlaceholder: () => (<Skeleton height={6} width="80%"/>)
     },
     {
@@ -204,34 +208,27 @@ class TransitionTable extends Component<TransitionTableProps, TransitionTableSta
 
     state: Readonly<TransitionTableState> = {
         dirty: false,
-        hasFail: false,
         taskKey: "",
-        specVersion: undefined,
-        specConfig: undefined,
-        clientNames: [],
-        clientVersions: {},
-        data: undefined,
-        startAfter: undefined,
-        endBefore: undefined,
+        listing: undefined,
+        searchState: {specVersion: undefined, specConfig: undefined, clients: {}, hasFail: false, after: undefined, before: undefined},
         loading: true,
         err: undefined
     };
 
     componentDidMount(): void {
-        this.loadData();
+        this.setState({searchState: listingSearchParamsToState(this.props.location.search)}, () => {
+            this.loadData();
+        });
     }
 
     loadData = () => {
         this.setState({err: undefined, loading: true}, () => {
-            queryListing({
-                clients: this.state.clientNames.map(name => ({name: name, version: this.state.clientVersions[name]})),
-                specVersion: this.state.specVersion,
-                specConfig: this.state.specConfig,
-                hasFail: this.state.hasFail,
-                startAfter: this.state.startAfter,
-                endBefore: this.state.endBefore,
-            }).then(listing => {
-                this.setState({data: listing, loading: false})
+            queryListing(this.state.searchState).then(resp => {
+                this.props.history.push({
+                    pathname: '/',
+                    search: "?" + resp.params.toString()
+                });
+                this.setState({listing: resp.listing, loading: false});
             }).catch(err => {
                 console.log(err);
                 this.setState({err: err, loading: false})
@@ -244,25 +241,39 @@ class TransitionTable extends Component<TransitionTableProps, TransitionTableSta
     };
 
     handleChangeSpecVersion = (event: React.ChangeEvent<HTMLInputElement>) => {
-        this.setState({specVersion: event.target.value as string, dirty: true});
+        this.setState(prev => ({
+            searchState: {...prev.searchState, specVersion: event.target.value as string},
+            dirty: true
+        }));
     };
 
     handleChangeSpecConfig = (event: React.ChangeEvent<HTMLInputElement>) => {
-        this.setState({specVersion: event.target.value as string, dirty: true});
+        this.setState(prev => ({
+            searchState: {...prev.searchState, specConfig: event.target.value as string},
+            dirty: true
+        }));
     };
 
     handleChangeClientVersion = (clientName: string) => (event: React.ChangeEvent<HTMLInputElement>) => {
         const value = event.target.value as string;
-        this.setState(prevState => ({
-            clientVersions: {...prevState.clientVersions, [clientName]: value}, dirty: true}));
+        this.setState(prev => ({
+            searchState: {...prev.searchState, clients: {...prev.searchState.clients, [clientName]: value}}, dirty: true
+        }));
     };
 
     handleChangeClientNames = (event: React.ChangeEvent<{ value: unknown }>) => {
-        this.setState({clientNames: event.target.value as string[], dirty: true});
+        this.setState(prev => {
+            const clients = event.target.value as string[];
+            const clientsMap: Record<string, string> = {};
+            clients.forEach(c => {
+                clientsMap[c] = prev.searchState.clients[c] || 'all'
+            });
+            return ({searchState: {...prev.searchState, clients: clientsMap}, dirty: true});
+        });
     };
 
     handleChangeHasFail = (event: React.ChangeEvent<HTMLInputElement>) => {
-        this.setState({hasFail: event.target.checked, dirty: true});
+        this.setState(prev => ({searchState: {...prev.searchState, hasFail: event.target.checked}, dirty: true}));
     };
 
     render() {
@@ -298,7 +309,8 @@ class TransitionTable extends Component<TransitionTableProps, TransitionTableSta
                                 </Grid>
                                 <Grid item>
                                     <TextField label="spec version"
-                                               onChange={this.handleChangeSpecVersion} className={classes.versionInput}/>
+                                               onChange={this.handleChangeSpecVersion}
+                                               className={classes.versionInput}/>
                                 </Grid>
                             </Grid>
                         </Grid>
@@ -318,7 +330,7 @@ class TransitionTable extends Component<TransitionTableProps, TransitionTableSta
                         <Grid item>
                             <FormControlLabel
                                 control={
-                                    <Switch checked={this.state.hasFail} color="primary"
+                                    <Switch checked={this.state.searchState.hasFail} color="primary"
                                             onChange={this.handleChangeHasFail} value="hasFail"/>
                                 }
                                 label="With crashes only"
@@ -330,7 +342,7 @@ class TransitionTable extends Component<TransitionTableProps, TransitionTableSta
                                 <Select
                                     multiple
                                     className={classes.clientNamesSelect}
-                                    value={this.state.clientNames}
+                                    value={Object.keys(this.state.searchState.clients)}
                                     onChange={this.handleChangeClientNames}
                                     input={<Input id="select-multiple-checkbox"/>}
                                     renderValue={selected => (selected as string[]).join(', ')}
@@ -338,14 +350,14 @@ class TransitionTable extends Component<TransitionTableProps, TransitionTableSta
                                 >
                                     {clientNames.map(name => (
                                         <MenuItem key={name} value={name}>
-                                            <Checkbox checked={this.state.clientNames.indexOf(name) > -1}/>
+                                            <Checkbox checked={this.state.searchState.clients.hasOwnProperty(name)}/>
                                             <ListItemText primary={name}/>
                                         </MenuItem>
                                     ))}
                                 </Select>
                             </FormControl>
                         </Grid>
-                        {this.state.clientNames.map(name => (
+                        {Object.entries(this.state.searchState.clients).map(([name, version]) => (
                             <Grid item key={"client-version-" + name}>
                                 <Grid container spacing={1} alignItems="flex-end">
                                     <Grid item>
@@ -353,7 +365,7 @@ class TransitionTable extends Component<TransitionTableProps, TransitionTableSta
                                     </Grid>
                                     <Grid item>
                                         <TextField label={name + " version"}
-                                                   value={this.state.clientVersions[name] || ""}
+                                                   value={version || ""}
                                                    onChange={this.handleChangeClientVersion(name)}
                                                    className={classes.versionInput}/>
                                     </Grid>
@@ -370,7 +382,7 @@ class TransitionTable extends Component<TransitionTableProps, TransitionTableSta
                     </Grid>
                 </div>
                 {this.state.loading && (
-                    <LinearProgress color="primary" />
+                    <LinearProgress color="primary"/>
                 )}
                 {!!this.state.err
                     ? (
@@ -380,28 +392,29 @@ class TransitionTable extends Component<TransitionTableProps, TransitionTableSta
                     )
                     : (
                         <div className={classes.tableContainer}>
-                        <Table>
-                            <TableHead className={classes.tableHead}>
-                                <TableRow>
-                                    {columns.map(column => (
-                                        <TableCell
-                                            key={column.id}
-                                            align="left"
-                                            className={classes.tableHeadCell}
-                                            style={{minWidth: column.minWidth}}
-                                        >
-                                            {column.label}
-                                        </TableCell>
-                                    ))}
-                                </TableRow>
-                            </TableHead>
+                            <Table>
+                                <TableHead className={classes.tableHead}>
+                                    <TableRow>
+                                        {columns.map(column => (
+                                            <TableCell
+                                                key={column.id}
+                                                align="left"
+                                                className={classes.tableHeadCell}
+                                                style={{minWidth: column.minWidth}}
+                                            >
+                                                {column.label}
+                                            </TableCell>
+                                        ))}
+                                    </TableRow>
+                                </TableHead>
                                 <TableBody className={classes.tableBody}>
                                     {this.state.loading
                                         ? (
                                             [...Array(20)].map((_, i) => (
                                                 <TableRow hover tabIndex={-1} key={'el' + i}>
                                                     {columns.map(column => (
-                                                        <TableCell key={column.id} className={classes.tableCell} align="left">
+                                                        <TableCell key={column.id} className={classes.tableCell}
+                                                                   align="left">
                                                             {column.cellPlaceholder()}
                                                         </TableCell>
                                                     ))}
@@ -409,36 +422,45 @@ class TransitionTable extends Component<TransitionTableProps, TransitionTableSta
                                             ))
                                         )
                                         : (
-                                            this.state.data && this.state.data.map(task => (
+                                            this.state.listing && this.state.listing.tasks.map(task => (
                                                 <TableRow hover tabIndex={-1} key={task.key}>
                                                     {columns.map(column => (
-                                                        <TableCell key={column.id} className={classes.tableCell} align="left">
+                                                        <TableCell key={column.id} className={classes.tableCell}
+                                                                   align="left">
                                                             {column.format(task)}
                                                         </TableCell>
                                                     ))}
                                                 </TableRow>
-                                                ))
+                                            ))
                                         )
                                     }
                                 </TableBody>
-                        </Table>
+                            </Table>
                         </div>
                     )
                 }
                 <div className={classes.tableEnd}/>
-                {this.state.data && this.state.data.length > 0 &&
-                <div className={classes.tableNav}>
-                    <Fab className={classes.navFab} aria-label="edit">
-                        <ArrowLeft/>
-                    </Fab>
-                    <Fab className={classes.navFab} aria-label="edit">
-                        <ArrowRight/>
-                    </Fab>
-                </div>
+                {this.state.listing &&
+                    <div className={classes.tableNav}>
+                        { (this.state.listing && this.state.listing.hasPrevPage && this.state.listing.tasks.length > 0) ?
+                        <Fab className={classes.navFab} aria-label="prev-page"
+                             href={'?before=' + this.state.listing.tasks[0].index.toString()}>
+                            <ArrowLeft/>
+                        </Fab>
+                            : <div/>
+                        }
+                        { (this.state.listing && this.state.listing.hasNextPage && this.state.listing.tasks.length > 0) ?
+                        <Fab className={classes.navFab} aria-label="next-page"
+                             href={'?after=' + this.state.listing.tasks[this.state.listing.tasks.length - 1].index.toString()}>
+                            <ArrowRight/>
+                        </Fab> : <div/>
+                        }
+                    </div>
                 }
             </>
         )
     }
 }
 
-export default withStyles(styles)(TransitionTable);
+const StyledTransitionTable = withStyles(styles)(TransitionTable);
+export default withRouter(StyledTransitionTable);
