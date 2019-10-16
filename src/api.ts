@@ -74,14 +74,14 @@ const apiEndpoint = 'http://localhost:8080';
 
 export type ListingResult = {
     tasks: Array<TaskData>,
-    maxIndex: number,
+    totalTaskCount: number,
 }
 
 const listingResultsDec = JsonDecoder.object<ListingResult>({
     tasks: listingTasksDec,
-    maxIndex: JsonDecoder.number,
+    totalTaskCount: JsonDecoder.number,
 }, 'listing result', {
-    maxIndex: 'max-index',
+    totalTaskCount: 'total-task-count',
 });
 
 export const queryListing = async (searchState: ListingSearchState): Promise<{listing: ListingResult, params: URLSearchParams}> => {
