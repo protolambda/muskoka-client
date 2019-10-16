@@ -1,5 +1,4 @@
 import {JsonDecoder} from "ts.data.json";
-import number = JsonDecoder.number;
 
 export const clientNames = [
     'artemis', 'harmony', 'lighthouse', 'lodestar', 'nimbus', 'prysm', 'pyspec', 'shasper', 'trinity', 'yeeth', 'zrnt'
@@ -80,7 +79,7 @@ export type ListingResult = {
 
 const listingResultsDec = JsonDecoder.object<ListingResult>({
     tasks: listingTasksDec,
-    maxIndex: number,
+    maxIndex: JsonDecoder.number,
 }, 'listing result', {
     maxIndex: 'max-index',
 });

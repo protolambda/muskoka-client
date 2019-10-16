@@ -119,6 +119,14 @@ const styles = (theme: Theme) => {
             justifyContent: "space-between",
             marginTop: 8
         },
+        resultsInfoPaper: {
+            backgroundColor: light ? '#ffcd4c' : '#1d1d1d',
+            color: "#fff",
+            width: "100%",
+            minHeight: "10rem",
+            padding: theme.spacing(2),
+            textAlign: "center"
+        },
         loadingErrPaper: {
             backgroundColor: theme.palette.error[theme.palette.type],
             color: "#fff",
@@ -436,6 +444,11 @@ class TransitionTable extends Component<TransitionTableProps, TransitionTableSta
                                     }
                                 </TableBody>
                             </Table>
+
+                            {this.state.listing && this.state.listing.maxIndex == 0 &&
+                            <div className={classes.resultsInfoPaper}>
+                                <Typography variant="subtitle1">No results found.</Typography>
+                            </div>}
                         </div>
                     )
                 }
