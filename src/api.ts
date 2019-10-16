@@ -1,4 +1,5 @@
 import {JsonDecoder} from "ts.data.json";
+import number = JsonDecoder.number;
 
 export const clientNames = [
     'artemis', 'harmony', 'lighthouse', 'lodestar', 'nimbus', 'prysm', 'pyspec', 'shasper', 'trinity', 'yeeth', 'zrnt'
@@ -74,17 +75,14 @@ const apiEndpoint = 'http://localhost:8080';
 
 export type ListingResult = {
     tasks: Array<TaskData>,
-    hasPrevPage: boolean,
-    hasNextPage: boolean,
+    maxIndex: number,
 }
 
 const listingResultsDec = JsonDecoder.object<ListingResult>({
     tasks: listingTasksDec,
-    hasPrevPage: JsonDecoder.boolean,
-    hasNextPage: JsonDecoder.boolean,
+    maxIndex: number,
 }, 'listing result', {
-    hasPrevPage: 'has-prev-page',
-    hasNextPage: 'has-next-page',
+    maxIndex: 'max-index',
 });
 
 export const queryListing = async (searchState: ListingSearchState): Promise<{listing: ListingResult, params: URLSearchParams}> => {
@@ -118,9 +116,9 @@ export type ListingSearchState = {
     clients: Record<string, string | undefined>,
     // if the results should be filtered to only contain fails.
     hasFail: boolean,
-    // paginate backwards by stopping *before* (i.e. excl) a given result
+    // paginate backwards by stopping *before* (i.e. excl) a given index
     before?: number,
-    // paginate forwards by continuing *after* (i.e. excl) a given result
+    // paginate forwards by continuing *after* (i.e. excl) a given index
     after?: number
 }
 

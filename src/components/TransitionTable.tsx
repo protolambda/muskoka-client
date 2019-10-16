@@ -442,14 +442,14 @@ class TransitionTable extends Component<TransitionTableProps, TransitionTableSta
                 <div className={classes.tableEnd}/>
                 {this.state.listing &&
                     <div className={classes.tableNav}>
-                        { (this.state.listing && this.state.listing.hasPrevPage && this.state.listing.tasks.length > 0) ?
+                        { (this.state.listing && this.state.listing.tasks.length > 0 && this.state.listing.tasks[0].index < this.state.listing.maxIndex) ?
                         <Fab className={classes.navFab} aria-label="prev-page"
                              href={'?before=' + this.state.listing.tasks[0].index.toString()}>
                             <ArrowLeft/>
                         </Fab>
                             : <div/>
                         }
-                        { (this.state.listing && this.state.listing.hasNextPage && this.state.listing.tasks.length > 0) ?
+                        { (this.state.listing && this.state.listing.tasks.length > 0 && this.state.listing.tasks[this.state.listing.tasks.length - 1].index > 0) ?
                         <Fab className={classes.navFab} aria-label="next-page"
                              href={'?after=' + this.state.listing.tasks[this.state.listing.tasks.length - 1].index.toString()}>
                             <ArrowRight/>
