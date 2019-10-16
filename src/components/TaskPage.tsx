@@ -16,7 +16,7 @@ import {
     CalendarClock, CheckBold, CloudDownload,
     CubeOutline, Download,
     FileDocumentBox,
-    FileSettingsVariantOutline, FlagOutline,
+    FileSettingsVariantOutline, FlagOutline, PoundBoxOutline,
     Tag
 } from "mdi-material-ui";
 import Moment from 'react-moment';
@@ -190,9 +190,8 @@ const columns: Column[] = [
     {
         id: 'out-view',
         label: 'Log',
-        // TODO open dialog with log in iframe
         format: (value: ResultEntry) => (
-            <IconButton aria-label="out-view" onClick={() => null}>
+            <IconButton aria-label="out-view"  href={value.data.files.outLogURL}>
                 <Download/>
             </IconButton>
         ),
@@ -201,9 +200,8 @@ const columns: Column[] = [
     {
         id: 'err-view',
         label: 'Error Log',
-        // TODO open dialog with log in iframe
         format: (value: ResultEntry) => (
-            <IconButton aria-label="err-view" onClick={() => null}>
+            <IconButton aria-label="err-view"  href={value.data.files.errLogURL}>
                 <Download/>
             </IconButton>
         ),
@@ -249,6 +247,8 @@ class TaskPage extends Component<TaskPageProps, TaskPageState> {
                     <br/>
                     <Grid container spacing={4} alignItems="flex-start" justify="space-between">
                         <Grid item>
+                            <TransitionDetail icon={<PoundBoxOutline/>} label="Index"
+                                              value={<KeyDisplay>{this.state.task && this.state.task.index}</KeyDisplay>} skeletonWidth={30}/>
                             <TransitionDetail icon={<FileDocumentBox/>} label="Task key"
                                               value={<KeyDisplay>{this.props.taskKey}</KeyDisplay>} skeletonWidth={0}/>
                             <TransitionDetail icon={<FileSettingsVariantOutline/>} label="Spec config"
@@ -284,9 +284,9 @@ class TaskPage extends Component<TaskPageProps, TaskPageState> {
                             {this.state.task &&
                             <List dense={true}>
                                 {([...(new Array(this.state.task.blocks))]).map((_, i) =>
-                                    <Link
+                                    <a
                                         // @ts-ignore
-                                        to={getBlocksInputURL(i)(this.props.taskKey, this.state.task.specVersion, this.state.task.specConfig)}
+                                        href={getBlocksInputURL(i)(this.props.taskKey, this.state.task.specVersion, this.state.task.specConfig)}
                                         className={classes.blocksDownloadLink}>
                                         <ListItem key={"block-download-" + i}>
                                             <ListItemIcon>
@@ -296,7 +296,7 @@ class TaskPage extends Component<TaskPageProps, TaskPageState> {
                                                 primary={"Download Block #" + i}
                                             />
                                         </ListItem>
-                                    </Link>,
+                                    </a>,
                                 )}
                             </List>
                             }

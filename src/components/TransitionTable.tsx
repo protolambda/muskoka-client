@@ -119,6 +119,9 @@ const styles = (theme: Theme) => {
             justifyContent: "space-between",
             marginTop: 8
         },
+        paginationText: {
+            color: "#fff",
+        },
         resultsInfoPaper: {
             backgroundColor: light ? '#ffcd4c' : '#1d1d1d',
             color: "#fff",
@@ -465,15 +468,18 @@ class TransitionTable extends Component<TransitionTableProps, TransitionTableSta
                 <div className={classes.tableEnd}/>
                 {this.state.listing &&
                     <div className={classes.tableNav}>
-                        { (this.state.listing && this.state.listing.tasks.length > 0 && this.state.listing.tasks[0].index < this.state.listing.totalTaskCount) ?
+                        { (this.state.listing && this.state.listing.tasks.length > 0 && this.state.listing.tasks[0].index + 1 < this.state.listing.totalTaskCount) ?
                         <Fab className={classes.navFab} aria-label="prev-page"
                              href={'?after=' + this.state.listing.tasks[0].index.toString()}>
                             <ArrowLeft/>
                         </Fab>
                             : <div/>
                         }
-                        { (this.state.listing && this.state.listing.tasks.length > 0) &&
-                            <Typography variant="subtitle1">{this.state.listing.tasks[0].index} - {this.state.listing.tasks[0].index} of {this.state.listing.totalTaskCount} results</Typography>
+                        { (this.state.listing && this.state.listing.tasks.length > 1) &&
+                        <Typography variant="subtitle1" className={classes.paginationText}>
+                            <strong>{this.state.listing.tasks[this.state.listing.tasks.length - 1].index}</strong> - <strong>
+                            {this.state.listing.tasks[0].index}</strong> of <strong>
+                            {this.state.listing.totalTaskCount}</strong> results</Typography>
                         }
                         { (this.state.listing && this.state.listing.tasks.length > 0 && this.state.listing.tasks[this.state.listing.tasks.length - 1].index > 0) ?
                         <Fab className={classes.navFab} aria-label="next-page"
