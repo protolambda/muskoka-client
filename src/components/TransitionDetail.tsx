@@ -10,7 +10,6 @@ import {Skeleton} from "@material-ui/lab";
 type State = {}
 
 const styles = (theme: Theme) => {
-    const light = theme.palette.type === 'light';
     return createStyles({
         root: {
             width: '100%',

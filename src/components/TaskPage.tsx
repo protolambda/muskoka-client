@@ -46,8 +46,8 @@ const styles = (theme: Theme) => {
     const light = theme.palette.type === 'light';
     return createStyles({
         taskGeneralContainer: {
-            backgroundColor: light ? '#ffcd4c' : '#1d1d1d',
-            color: light ? '#333333' : '#cccccc',
+            backgroundColor: theme.palette.primary.main,
+            color: theme.palette.primary.contrastText,
             paddingTop: theme.spacing(2),
             paddingBottom: theme.spacing(2),
             paddingLeft: theme.spacing(4),
@@ -70,18 +70,18 @@ const styles = (theme: Theme) => {
             overflowX: 'scroll',
         },
         tableHead: {
-            backgroundColor: light ? '#ffcd4c' : '#1d1d1d',
+            backgroundColor: theme.palette.primary.main,
         },
         tableHeadCell: {
-            backgroundColor: light ? '#ffcd4c' : '#1d1d1d',
-            color: light ? '#333333' : '#cccccc',
+            backgroundColor: theme.palette.primary.main,
+            color: theme.palette.primary.contrastText,
         },
         tableBody: {
-            backgroundColor: light ? '#feffe9' : '#191919',
+            backgroundColor: theme.palette.primary.light,
         },
         tableCell: {
-            borderBottomColor: light ? '#ffcd4c' : '#191919',
-            color: light ? '#333333' : '#cccccc',
+            borderBottomColor: theme.palette.primary.light,
+            color: theme.palette.primary.contrastText,
         },
         tableNav: {
             display: "flex",
@@ -90,22 +90,22 @@ const styles = (theme: Theme) => {
         },
         loadingErrPaper: {
             backgroundColor: theme.palette.error[theme.palette.type],
-            color: "#fff",
+            color: theme.palette.error.contrastText,
             width: "100%",
             minHeight: "10rem",
             padding: theme.spacing(2),
             textAlign: "center"
         },
         tableEnd: {
-            backgroundColor: light ? '#ffcd4c' : '#1d1d1d',
+            backgroundColor: theme.palette.primary.main,
             width: "100%",
             height: theme.spacing(1),
             borderBottomLeftRadius: theme.spacing(1),
             borderBottomRightRadius: theme.spacing(1),
         },
         navFab: {
-            backgroundColor: light ? '#ffcd4c' : '#1d1d1d',
-            color: light ? "#fff" : "#999"
+            backgroundColor: theme.palette.secondary.main,
+            color: theme.palette.secondary.contrastText,
         }
     });
 };
