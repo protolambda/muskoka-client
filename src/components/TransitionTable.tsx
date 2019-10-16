@@ -158,7 +158,7 @@ type TransitionTableParams = {
 type TransitionTableProps = WithStyles<typeof styles> & RouteComponentProps<TransitionTableParams> & {}
 
 interface Column {
-    id: 'key' | 'time' | 'spec-version' | 'spec-config' | 'blocks' | 'clients';
+    id: 'index' | 'key' | 'time' | 'spec-version' | 'spec-config' | 'blocks' | 'clients';
     label: any;
     minWidth?: number;
     format: (value: TaskData) => any;
@@ -166,6 +166,16 @@ interface Column {
 }
 
 const columns: Column[] = [
+    {
+        id: 'index',
+        label: '#',
+        minWidth: 30,
+        format: (value: TaskData) => (<Link to={'/task/' + value.key} style={{
+            textDecoration: 'none',
+            color: 'inherit'
+        }}>{value.index}</Link>),
+        cellPlaceholder: () => (<Skeleton height={6} width="80%"/>)
+    },
     {
         id: 'key',
         label: 'Key',
@@ -457,14 +467,17 @@ class TransitionTable extends Component<TransitionTableProps, TransitionTableSta
                     <div className={classes.tableNav}>
                         { (this.state.listing && this.state.listing.tasks.length > 0 && this.state.listing.tasks[0].index < this.state.listing.maxIndex) ?
                         <Fab className={classes.navFab} aria-label="prev-page"
-                             href={'?before=' + this.state.listing.tasks[0].index.toString()}>
+                             href={'?after=' + this.state.listing.tasks[0].index.toString()}>
                             <ArrowLeft/>
                         </Fab>
                             : <div/>
                         }
+                        { (this.state.listing && this.state.listing.tasks.length > 0) &&
+                            <Typography variant="subtitle1">{this.state.listing.tasks[0].index} - {this.state.listing.tasks[0].index} of {this.state.listing.maxIndex} results</Typography>
+                        }
                         { (this.state.listing && this.state.listing.tasks.length > 0 && this.state.listing.tasks[this.state.listing.tasks.length - 1].index > 0) ?
                         <Fab className={classes.navFab} aria-label="next-page"
-                             href={'?after=' + this.state.listing.tasks[this.state.listing.tasks.length - 1].index.toString()}>
+                             href={'?before=' + this.state.listing.tasks[this.state.listing.tasks.length - 1].index.toString()}>
                             <ArrowRight/>
                         </Fab> : <div/>
                         }
