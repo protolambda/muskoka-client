@@ -16,7 +16,6 @@ const styles = (theme: Theme) => {
         },
         fab: {
             margin: theme.spacing(1),
-            backgroundColor: light ? '#de2a42' : '#751923',
         },
         extendedIcon: {
             marginRight: theme.spacing(1),
@@ -32,7 +31,7 @@ const LandingHeader: React.FC<Props> = ({classes}) => (
         <Container maxWidth="md">
             <Grid container spacing={4} alignItems="flex-end">
                 <Grid item>
-                    <Fab variant="extended" color="primary" aria-label="delete" className={classes.fab} href="/new">
+                    <Fab variant="extended" aria-label="delete" className={classes.fab} href="/new">
                         <Upload className={classes.extendedIcon} />
                         Upload new transition
                     </Fab>

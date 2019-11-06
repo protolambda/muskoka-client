@@ -43,7 +43,6 @@ type TaskPageState = {
 }
 
 const styles = (theme: Theme) => {
-    const light = theme.palette.type === 'light';
     return createStyles({
         taskGeneralContainer: {
             backgroundColor: theme.palette.primary.main,
@@ -77,10 +76,10 @@ const styles = (theme: Theme) => {
             color: theme.palette.primary.contrastText,
         },
         tableBody: {
-            backgroundColor: theme.palette.primary.light,
+            backgroundColor: theme.palette.secondary.main,
         },
         tableCell: {
-            borderBottomColor: theme.palette.primary.light,
+            borderBottomColor: theme.palette.secondary.main,
             color: theme.palette.primary.contrastText,
         },
         tableNav: {

@@ -73,7 +73,6 @@ const ClientMenuProps = {
 };
 
 const styles = (theme: Theme) => {
-    const light = theme.palette.type === 'light';
     return createStyles({
         tableFilters: {
             backgroundColor: theme.palette.primary.main,
@@ -108,10 +107,10 @@ const styles = (theme: Theme) => {
             color: theme.palette.primary.contrastText,
         },
         tableBody: {
-            backgroundColor: theme.palette.primary.light,
+            backgroundColor: theme.palette.secondary.main,
         },
         tableCell: {
-            borderBottomColor: theme.palette.primary.light,
+            borderBottomColor: theme.palette.secondary.main,
             color: theme.palette.primary.contrastText,
         },
         tableNav: {
@@ -315,7 +314,7 @@ class TransitionTable extends Component<TransitionTableProps, TransitionTableSta
                             </Grid>
                         </Grid>
                         <Grid item>
-                            <Button variant="contained" color="primary" disabled={this.state.taskKey === ""}
+                            <Button variant="contained" color="secondary" disabled={this.state.taskKey === ""}
                                     href={"/task/" + encodeURIComponent(this.state.taskKey)}>
                                 Lookup
                             </Button>
@@ -394,7 +393,7 @@ class TransitionTable extends Component<TransitionTableProps, TransitionTableSta
                             </Grid>
                         ))}
                         <Grid item>
-                            <Button variant="contained" color="primary" disabled={!this.state.dirty}
+                            <Button variant="contained" color="secondary" disabled={!this.state.dirty}
                                     onClick={this.loadData}>
                                 <Magnify/>
                                 Search
@@ -408,7 +407,7 @@ class TransitionTable extends Component<TransitionTableProps, TransitionTableSta
                 {!!this.state.err
                     ? (
                         <div className={classes.loadingErrPaper}>
-                            <Typography variant="subtitle1">{this.state.err.toString()}</Typography>
+                            <Typography variant="subtitle1">{this.state.err.toString().replace('TypeError: ', '')}</Typography>
                         </div>
                     )
                     : (

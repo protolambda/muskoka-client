@@ -38,12 +38,11 @@ type State = {
 }
 
 const styles = (theme: Theme) => {
-    const light = theme.palette.type === 'light';
     return createStyles({
         root: {
             width: "100%",
-            backgroundColor: light ? '#ffcd4c' : '#1d1d1d',
-            color: light ? '#333333' : '#cccccc',
+            backgroundColor: theme.palette.primary.main,
+            color: theme.palette.primary.contrastText,
             padding: theme.spacing(2),
             minHeight: 300,
         },
@@ -254,7 +253,7 @@ class NewTransition extends Component<Props, State> {
                         </Grid>
                         <Grid item>
                             <label htmlFor="pre-input">
-                                <Button component="span" className={classes.preStateBtn} variant="contained" color="primary"
+                                <Button component="span" className={classes.preStateBtn} variant="contained" color="secondary"
                                         onClick={(e: React.MouseEvent<HTMLAnchorElement>) => e.stopPropagation()}>
                                     Select pre-state
                                 </Button>
@@ -274,7 +273,7 @@ class NewTransition extends Component<Props, State> {
                         <Grid item>
                             <div>
                                 <label htmlFor="blocks-input">
-                                    <Button component="span" className={classes.blocksBtn} variant="contained" color="primary"
+                                    <Button component="span" className={classes.blocksBtn} variant="contained" color="secondary"
                                             onClick={(e: React.MouseEvent<HTMLAnchorElement>) => e.stopPropagation()}>
                                         Select blocks
                                     </Button>
