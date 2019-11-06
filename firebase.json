@@ -1,0 +1,27 @@
+{
+  "hosting": {
+    "public": "public",
+    "rewrites": [
+      {
+        "source": "/api/upload",
+        "function": "upload"
+      },
+      {
+        "source": "/api/listing",
+        "function": "listing"
+      },
+      {
+        "source": "/api/task",
+        "function": "task"
+      },
+      {
+        "source": "**",
+        "destination": "/index.html"
+      } ],
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ]
+  }
+}

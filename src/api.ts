@@ -70,8 +70,8 @@ const taskDec = JsonDecoder.object<TaskData>({
 const listingTasksDec = JsonDecoder.array<TaskData>(taskDec, 'listing tasks');
 
 // TODO change to '', to query from site root url. (api running on same domain as website is hosted)
-// const apiEndpoint = 'https://muskoka.cloud/api';
-const apiEndpoint = 'http://localhost:8080';
+const apiEndpoint = 'https://muskoka.cloud/api';
+// const apiEndpoint = 'http://localhost:8080';
 
 export type ListingResult = {
     tasks: Array<TaskData>,
