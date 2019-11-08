@@ -1,0 +1,355 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "transitions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "`spec-config`",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "index",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "transitions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "`spec-version`",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "index",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "transitions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "`has-fail`",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "index",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "transitions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "`workers-versioned`.artemis",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "index",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "transitions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "`workers`.artemis",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "index",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "transitions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "`workers-versioned`.harmony",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "index",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "transitions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "`workers`.harmony",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "index",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "transitions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "`workers-versioned`.lighthouse",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "index",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "transitions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "`workers`.lighthouse",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "index",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "transitions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "`workers-versioned`.lodestar",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "index",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "transitions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "`workers`.lodestar",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "index",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "transitions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "`workers-versioned`.nimbus",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "index",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "transitions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "`workers`.nimbus",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "index",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "transitions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "`workers-versioned`.prysm",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "index",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "transitions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "`workers`.prysm",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "index",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "transitions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "`workers-versioned`.pyspec",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "index",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "transitions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "`workers`.pyspec",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "index",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "transitions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "`workers-versioned`.shasper",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "index",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "transitions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "`workers`.shasper",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "index",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "transitions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "`workers-versioned`.trinity",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "index",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "transitions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "`workers`.trinity",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "index",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "transitions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "`workers-versioned`.yeeth",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "index",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "transitions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "`workers`.yeeth",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "index",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "transitions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "`workers-versioned`.zrnt",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "index",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "transitions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "`workers`.zrnt",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "index",
+          "order": "DESCENDING"
+        }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

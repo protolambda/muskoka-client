@@ -16,10 +16,20 @@ Install firebase CLI tool: `npm install -g firebase-tools`
 
 Login: `firebase login`
 
-Configuration can be found in `firebase.json`, from this dir, deploy the frontend (and apply hosting configuration to forward paths to cloud funcs) with:
+### Hosting
+
+Hosting configuration can be found in `firebase.json`, from this dir, deploy the frontend (and apply hosting configuration to forward paths to cloud funcs) with:
 `firebase deploy --project muskoka --only hosting`
 
 The cloud functions of Muskoka are written in Go and deployed separately (hence the `--only hosting`).
+
+### Firestore
+
+Firestore (the revived google-datastore product) is used to back the tasks/results tracking.
+Queries require composite indexes because of the applied sort order. See `firestore.indexes.json`.
+Luckily, zig-zag merge-joins allow to not have indexes for any permutation, we just need `(index, *field*)` pairs. 
+
+The indexes can be deployed with `firebase deploy --project muskoka --only firestore:indexes`
 
 ## License
 
