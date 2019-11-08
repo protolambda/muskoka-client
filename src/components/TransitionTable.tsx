@@ -122,7 +122,7 @@ const styles = (theme: Theme) => {
             color: "#fff",
         },
         resultsInfoPaper: {
-            backgroundColor: theme.palette.secondary.light,
+            backgroundColor: theme.palette.secondary.main,
             color: "#fff",
             width: "100%",
             minHeight: "10rem",
