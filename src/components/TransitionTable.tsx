@@ -151,6 +151,20 @@ const styles = (theme: Theme) => {
     });
 };
 
+const HasFailSwitch = withStyles({
+    switchBase: {
+        color: "#aaa",
+        '&$checked': {
+            color: "#e22",
+        },
+        '&$checked + $track': {
+            backgroundColor: "#e22",
+        },
+    },
+    checked: {},
+    track: {},
+})(Switch);
+
 // Router params, aka 'this.props.match.params.*'
 type TransitionTableParams = {
     before?: string,
@@ -293,7 +307,8 @@ class TransitionTable extends Component<TransitionTableProps, TransitionTableSta
     };
 
     handleChangeHasFail = (event: React.ChangeEvent<HTMLInputElement>) => {
-        this.setState(prev => ({searchState: {...prev.searchState, hasFail: event.target.checked}, dirty: true}));
+        const checked = event.target.checked;
+        this.setState(prev => ({searchState: {...prev.searchState, hasFail: checked}, dirty: true}));
     };
 
     render() {
@@ -350,7 +365,7 @@ class TransitionTable extends Component<TransitionTableProps, TransitionTableSta
                         <Grid item>
                             <FormControlLabel
                                 control={
-                                    <Switch checked={this.state.searchState.hasFail} color="primary"
+                                    <HasFailSwitch checked={this.state.searchState.hasFail}
                                             onChange={this.handleChangeHasFail} value="hasFail"/>
                                 }
                                 label="With crashes only"
