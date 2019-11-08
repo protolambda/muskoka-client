@@ -457,7 +457,7 @@ class TransitionTable extends Component<TransitionTableProps, TransitionTableSta
                                 </TableBody>
                             </Table>
 
-                            {this.state.listing && this.state.listing.totalTaskCount == 0 &&
+                            {this.state.listing && this.state.listing.tasks.length == 0 &&
                             <div className={classes.resultsInfoPaper}>
                                 <Typography variant="subtitle1">No results found.</Typography>
                             </div>}
@@ -477,8 +477,7 @@ class TransitionTable extends Component<TransitionTableProps, TransitionTableSta
                         { (this.state.listing && this.state.listing.tasks.length > 1) &&
                         <Typography variant="subtitle1" className={classes.paginationText}>
                             <strong>{this.state.listing.tasks[this.state.listing.tasks.length - 1].index}</strong> - <strong>
-                            {this.state.listing.tasks[0].index}</strong> of <strong>
-                            {this.state.listing.totalTaskCount}</strong> results</Typography>
+                            {this.state.listing.tasks[0].index}</strong></Typography>
                         }
                         { (this.state.listing && this.state.listing.tasks.length > 0 && this.state.listing.tasks[this.state.listing.tasks.length - 1].index > 0) ?
                         <Fab className={classes.navFab} aria-label="next-page"
