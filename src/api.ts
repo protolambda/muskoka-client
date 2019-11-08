@@ -61,7 +61,7 @@ const taskDec = JsonDecoder.object<TaskData>({
     specConfig: JsonDecoder.string,
     created: JsonDecoder.string,
     key: JsonDecoder.string,
-    results: JsonDecoder.oneOf<Record<string, ResultData>>([JsonDecoder.isUndefined({}), resultsDec], 'optional result-dict'),
+    results: JsonDecoder.oneOf<Record<string, ResultData>>([JsonDecoder.isUndefined({}), JsonDecoder.isNull({}), resultsDec], 'optional result-dict'),
 }, 'task', {
     specVersion: 'spec-version',
     specConfig: 'spec-config'
